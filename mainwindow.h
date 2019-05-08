@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "sure.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,12 +17,14 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_3_clicked();
+
+
 
     void on_quitButton_clicked();
 
 private:
     Ui::MainWindow *ui;
+    Sure *sure;
 };
 
 #endif // MAINWINDOW_H
