@@ -22,6 +22,8 @@ private slots:
 
     void on_quitButton_clicked();
 
+    void on_addStudentButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Sure *sure;

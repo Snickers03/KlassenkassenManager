@@ -15,6 +15,9 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTableWidget" name="tableWidget">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>9</x>
@@ -131,9 +134,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="addStudentButton">
        <property name="text">
-        <string>Schüler</string>
+        <string>Schüler hinzufügen</string>
        </property>
       </widget>
      </item>

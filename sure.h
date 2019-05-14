@@ -18,6 +18,7 @@ public:
 private slots:
 
 
+
     void on_quitYes_clicked();
 
 private:

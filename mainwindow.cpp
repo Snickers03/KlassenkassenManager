@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "sure.h"
+#include "addstudent.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -8,8 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*connect(ui->quitButton, SIGNAL(clicked()),
-            this, SLOT(close()));*/
 }
 
 MainWindow::~MainWindow()
@@ -19,5 +18,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_quitButton_clicked()
 {
-    close();
+    Sure su(this);
+    su.setWindowTitle("Schliessen");
+    su.exec();
+}
+
+void MainWindow::on_addStudentButton_clicked()
+{
+    addStudent addStud(this);
+    addStud.setWindowTitle("Schüler hinzufügen");
+    addStud.exec();
 }
