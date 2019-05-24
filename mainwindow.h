@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QWidget>
 #include "sure.h"
 
 namespace Ui {
@@ -17,8 +18,6 @@ public:
     ~MainWindow();
 
 private slots:
-
-
 
     void on_quitButton_clicked();
 

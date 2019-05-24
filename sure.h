@@ -17,9 +17,9 @@ public:
 
 private slots:
 
-
-
     void on_quitYes_clicked();
+
+    void on_quitNo_clicked();
 
 private:
     Ui::Sure *ui;
