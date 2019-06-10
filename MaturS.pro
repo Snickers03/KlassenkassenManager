@@ -28,12 +28,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     sure.cpp \
-    addstudent.cpp
+    addstudent.cpp \
+    student.cpp
 
 HEADERS += \
         mainwindow.h \
     sure.h \
-    addstudent.h
+    addstudent.h \
+    student.h
 
 FORMS += \
         mainwindow.ui \
@@ -44,3 +46,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    images.qrc

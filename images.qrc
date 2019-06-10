@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/icons8-add-new-100.png</file>
+        <file>images/icons8-save-100.png</file>
+        <file>images/icons8-cancel-96.png</file>
+        <file>images/icons8-stack-of-money-filled-96.png</file>
+    </qresource>
+    <qresource prefix="/"/>
+</RCC>

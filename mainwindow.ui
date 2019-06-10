@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
-    <height>522</height>
+    <width>793</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +25,8 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>441</width>
-      <height>411</height>
+      <width>591</width>
+      <height>371</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -32,12 +35,21 @@
 	border-collapse: collapse;
 }</string>
     </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
     <property name="showGrid">
      <bool>true</bool>
     </property>
     <property name="gridStyle">
      <enum>Qt::SolidLine</enum>
     </property>
+    <attribute name="horizontalHeaderStretchLastSection">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderStretchLastSection">
+     <bool>false</bool>
+    </attribute>
     <row>
      <property name="text">
       <string>1</string>
@@ -62,23 +74,32 @@
      <property name="text">
       <string>Schellenbaum</string>
      </property>
+     <property name="textAlignment">
+      <set>AlignLeading|AlignVCenter</set>
+     </property>
     </item>
     <item row="0" column="1">
      <property name="text">
       <string>Nic</string>
+     </property>
+     <property name="textAlignment">
+      <set>AlignLeading|AlignVCenter</set>
      </property>
     </item>
     <item row="0" column="2">
      <property name="text">
       <string>200</string>
      </property>
+     <property name="textAlignment">
+      <set>AlignTrailing|AlignVCenter</set>
+     </property>
     </item>
    </widget>
    <widget class="QPushButton" name="quitButton">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>430</y>
+      <x>670</x>
+      <y>390</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -98,7 +119,7 @@
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel {
-	color: blue;
+	color: grey;
 	font: 20pt &quot;MS Shell Dlg 2&quot;;
 }</string>
     </property>
@@ -109,29 +130,96 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>690</x>
       <y>10</y>
       <width>251</width>
       <height>25</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Zahlung erfassen</string>
+    <layout class="QHBoxLayout" name="horizontalLayout"/>
+   </widget>
+   <widget class="QPushButton" name="chooseAllButton">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>430</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Alle auswählen</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>60</y>
+      <width>158</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QDoubleSpinBox" name="balanceSpinBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="minimum">
+        <double>-9999999.990000000223517</double>
+       </property>
+       <property name="maximum">
+        <double>9999999.990000000223517</double>
+       </property>
+       <property name="singleStep">
+        <double>5.000000000000000</double>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="addStudentButton">
-       <property name="text">
-        <string>Schüler hinzufügen</string>
+     <item row="0" column="1">
+      <widget class="QSpinBox" name="studentSpinBox"/>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QDialogButtonBox" name="balanceButtonBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>793</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDatei">
+    <property name="title">
+     <string>Datei</string>
+    </property>
+    <addaction name="action_ffnen"/>
+    <addaction name="actionSpeichern"/>
+   </widget>
+   <widget class="QMenu" name="menuBearbeiten">
+    <property name="title">
+     <string>Bearbeiten</string>
+    </property>
+    <addaction name="addStudent"/>
+    <addaction name="deleteStudent"/>
+    <addaction name="separator"/>
+    <addaction name="actionZahlung"/>
+   </widget>
+   <addaction name="menuDatei"/>
+   <addaction name="menuBearbeiten"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -140,26 +228,59 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionSpeichern"/>
+   <addaction name="separator"/>
+   <addaction name="addStudent"/>
+   <addaction name="deleteStudent"/>
+   <addaction name="actionZahlung"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>687</width>
-     <height>21</height>
-    </rect>
+  <action name="actionSpeichern">
+   <property name="icon">
+    <iconset>
+     <normalon>:/images/images/icons8-save-100.png</normalon>
+    </iconset>
    </property>
-   <widget class="QMenu" name="menuDatei">
-    <property name="title">
-     <string>Datei</string>
-    </property>
-   </widget>
-   <addaction name="menuDatei"/>
-  </widget>
+   <property name="text">
+    <string>Speichern</string>
+   </property>
+  </action>
+  <action name="action_ffnen">
+   <property name="text">
+    <string>Öffnen</string>
+   </property>
+  </action>
+  <action name="addStudent">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/images/icons8-add-new-100.png</normaloff>:/images/images/icons8-add-new-100.png</iconset>
+   </property>
+   <property name="text">
+    <string>Hinzufügen</string>
+   </property>
+  </action>
+  <action name="deleteStudent">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/images/icons8-cancel-96.png</normaloff>:/images/images/icons8-cancel-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Löschen</string>
+   </property>
+  </action>
+  <action name="actionZahlung">
+   <property name="icon">
+    <iconset>
+     <normalon>:/images/images/icons8-stack-of-money-filled-96.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Zahlung</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

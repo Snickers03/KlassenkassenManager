@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "sure.h"
 #include "addstudent.h"
+#include "student.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -9,11 +10,17 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //QStringList titles;
-    //ui->tableWidget->setColumnCount(3);
-    //titles << "Name" << "Vorname" << "Guthaben";
-   // ui->tableWidget->setHorizontalHeaderLabels(titles);
+    ui->balanceSpinBox->setVisible(false);
+    ui->balanceButtonBox->setVisible(false);
+    ui->studentSpinBox->setVisible(false);
 
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    stud[0].setVorname("Nic");  //iniatalize example
+    stud[0].setName("Schellenbaum");
+    stud[0].setBalance(500);
+
+    updateTable(0);
 }
 
 MainWindow::~MainWindow()
@@ -33,11 +40,11 @@ void MainWindow::on_quitButton_clicked()
     }
 }
 
-void MainWindow::on_addStudentButton_clicked()
+void MainWindow::on_addStudent_triggered()
 {
     addStudent addStud(this);
     addStud.setWindowTitle("Schüler hinzufügen");
-    double balance;
+    //double balance;
     QString name, vorname;
 
     bool res;
@@ -45,14 +52,60 @@ void MainWindow::on_addStudentButton_clicked()
     if (res == false)
             return;
 
-    balance = addStud.getBalance();
-    name = addStud.getName();
-    vorname = addStud.getVorname();
+    stud[i].setVorname(addStud.getVorname()); //set object values
+    stud[i].setName(addStud.getName());
+    stud[i].setBalance(addStud.getBalance());
 
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());    //add new cell
     int currentRow = ui->tableWidget->rowCount() - 1;
 
-    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(name));
-    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(vorname));
-    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(balance)));
+    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[i].getName()));
+    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(stud[i].getVorname()));
+    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[i].getBalance())));
+
+    i++;
 }
+
+void MainWindow::updateTable(int row)
+{
+    ui->tableWidget->item(row, 0)->setText(stud[row].getName());
+    ui->tableWidget->item(row, 1)->setText(stud[row].getVorname());
+    ui->tableWidget->item(row, 2)->setText(QString::number(stud[row].getBalance()));
+}
+
+void MainWindow::on_actionZahlung_triggered()
+{
+    ui->balanceSpinBox->setVisible(true);
+    ui->balanceButtonBox->setVisible(true);
+    ui->studentSpinBox->setVisible(true);
+}
+
+void MainWindow::on_balanceButtonBox_accepted()
+{
+    double amount = ui->balanceSpinBox->value();
+    int studentNum = ui->studentSpinBox->value() - 1;
+
+    stud[studentNum].changeBalance(amount);
+    updateTable(studentNum);
+
+    ui->balanceSpinBox->setVisible(false);   //hide payment elements
+    ui->balanceButtonBox->setVisible(false);
+    ui->studentSpinBox->setVisible(false);
+}
+
+void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
+{
+    ui->tableWidget->selectRow(row);
+}
+
+void MainWindow::on_chooseAllButton_clicked()
+{
+    ui->tableWidget->setFocus();
+    ui->tableWidget->selectAll();
+}
+
+void MainWindow::on_deleteStudent_triggered()
+{
+    ui->tableWidget->removeRow(ui->tableWidget->currentRow());
+}
+

@@ -12,7 +12,7 @@ class addStudent : public QDialog
     Q_OBJECT
 
 public:
-    explicit addStudent(QWidget *parent = nullptr, QString name = "", QString vorname = "", int balance = 0);
+    explicit addStudent(QWidget *parent = nullptr, QString name = "", QString vorname = "", double balance = 0);
     ~addStudent();
 
     QString getName();

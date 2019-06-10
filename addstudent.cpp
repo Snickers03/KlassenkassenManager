@@ -2,7 +2,7 @@
 #include "ui_addstudent.h"
 #include "mainwindow.h"
 
-addStudent::addStudent(QWidget *parent, QString name, QString vorname, int balance) :
+addStudent::addStudent(QWidget *parent, QString name, QString vorname, double balance) :
     QDialog(parent),
     ui(new Ui::addStudent)
 {
