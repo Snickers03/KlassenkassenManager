@@ -47,3 +47,8 @@ void Student::changeBalance(double amount)
 {
     this->balance += amount;
 }
+
+void Student::addPayReason(QString reason)
+{
+    this->payments.append(reason);
+}

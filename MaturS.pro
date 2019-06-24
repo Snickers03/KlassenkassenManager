@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,18 +29,21 @@ SOURCES += \
         mainwindow.cpp \
     sure.cpp \
     addstudent.cpp \
-    student.cpp
+    student.cpp \
+    payments.cpp
 
 HEADERS += \
         mainwindow.h \
     sure.h \
     addstudent.h \
-    student.h
+    student.h \
+    payments.h
 
 FORMS += \
         mainwindow.ui \
     sure.ui \
-    addstudent.ui
+    addstudent.ui \
+    payments.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

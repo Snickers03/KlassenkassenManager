@@ -99,7 +99,7 @@
     <property name="geometry">
      <rect>
       <x>670</x>
-      <y>390</y>
+      <y>430</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -151,20 +151,26 @@
      <string>Alle auswählen</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>60</y>
-      <width>158</width>
-      <height>51</height>
+      <x>620</x>
+      <y>50</y>
+      <width>161</width>
+      <height>249</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
       <widget class="QDoubleSpinBox" name="balanceSpinBox">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="minimum">
         <double>-9999999.990000000223517</double>
@@ -177,10 +183,14 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QSpinBox" name="studentSpinBox"/>
+     <item>
+      <widget class="QTextEdit" name="balanceTextEdit">
+       <property name="placeholderText">
+        <string>Zahlungsgrund</string>
+       </property>
+      </widget>
      </item>
-     <item row="1" column="0" colspan="2">
+     <item>
       <widget class="QDialogButtonBox" name="balanceButtonBox">
        <property name="enabled">
         <bool>true</bool>
@@ -208,6 +218,8 @@
     </property>
     <addaction name="action_ffnen"/>
     <addaction name="actionSpeichern"/>
+    <addaction name="separator"/>
+    <addaction name="actionBeenden"/>
    </widget>
    <widget class="QMenu" name="menuBearbeiten">
     <property name="title">
@@ -217,6 +229,7 @@
     <addaction name="deleteStudent"/>
     <addaction name="separator"/>
     <addaction name="actionZahlung"/>
+    <addaction name="actionSort"/>
    </widget>
    <addaction name="menuDatei"/>
    <addaction name="menuBearbeiten"/>
@@ -275,6 +288,16 @@
    </property>
    <property name="text">
     <string>Zahlung</string>
+   </property>
+  </action>
+  <action name="actionSort">
+   <property name="text">
+    <string>Sortieren</string>
+   </property>
+  </action>
+  <action name="actionBeenden">
+   <property name="text">
+    <string>Beenden</string>
    </property>
   </action>
  </widget>

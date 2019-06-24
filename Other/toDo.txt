@@ -1,0 +1,9 @@
+-Überblick aller Zahlungen
+	-Speichern Zahlungsgrund
+
+-Speicher- & Ladefunktion
+	(Excel)
+
+-bessere Auswahl der Schüler
+
+-responsive

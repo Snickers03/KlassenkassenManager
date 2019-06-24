@@ -6,6 +6,7 @@
 #include "sure.h"
 #include "addstudent.h"
 #include "student.h"
+#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +21,8 @@ public:
     ~MainWindow();
 
     void updateTable(int row);
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role);
 
 private slots:
 
@@ -37,12 +40,22 @@ private slots:
 
     void on_actionZahlung_triggered();
 
+    void on_actionSpeichern_triggered();
+
+    void on_actionSort_triggered();
+
+    void on_balanceButtonBox_rejected();
+
+    void on_actionBeenden_triggered();
+
 private:
     Ui::MainWindow *ui;
     Sure *sure;
+    QMessageBox message;
 
     int i = 1;  //change later!!!
     Student stud[50];
+    int studAmount = 1;
 };
 
 #endif // MAINWINDOW_H

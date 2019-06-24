@@ -2,6 +2,7 @@
 #define STUDENT_H
 
 #include <QObject>
+#include <QVector>
 
 class Student
 {
@@ -18,11 +19,15 @@ public:
     void setBalance(double balance);
 
     void changeBalance(double amount);
+    bool changed = false;
+
+    void addPayReason(QString reason);
 
 private:
     QString vorname;
     QString name;
     double balance;
+    QVector<QString> payments;
 };
 
 #endif // STUDENT_H

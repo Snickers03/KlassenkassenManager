@@ -3,6 +3,12 @@
 #include "sure.h"
 #include "addstudent.h"
 #include "student.h"
+#include <QFile>
+#include <QTextStream>
+#include <QItemSelectionModel>
+#include <QModelIndexList>
+#include <QMessageBox>
+#include <QtSql>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,15 +18,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->balanceSpinBox->setVisible(false);
     ui->balanceButtonBox->setVisible(false);
-    ui->studentSpinBox->setVisible(false);
+    ui->balanceTextEdit->setVisible(false);
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    stud[0].setVorname("Nic");  //iniatalize example
+    stud[0].setVorname("Nic");      //iniatalize example
     stud[0].setName("Schellenbaum");
     stud[0].setBalance(500);
 
     updateTable(0);
+
+
 }
 
 MainWindow::~MainWindow()
@@ -52,7 +60,7 @@ void MainWindow::on_addStudent_triggered()
     if (res == false)
             return;
 
-    stud[i].setVorname(addStud.getVorname()); //set object values
+    stud[i].setVorname(addStud.getVorname());   //set object values
     stud[i].setName(addStud.getName());
     stud[i].setBalance(addStud.getBalance());
 
@@ -64,6 +72,7 @@ void MainWindow::on_addStudent_triggered()
     ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[i].getBalance())));
 
     i++;
+    studAmount++;
 }
 
 void MainWindow::updateTable(int row)
@@ -77,35 +86,124 @@ void MainWindow::on_actionZahlung_triggered()
 {
     ui->balanceSpinBox->setVisible(true);
     ui->balanceButtonBox->setVisible(true);
-    ui->studentSpinBox->setVisible(true);
+    ui->balanceTextEdit->setVisible(true);
 }
 
 void MainWindow::on_balanceButtonBox_accepted()
 {
+    int row;
     double amount = ui->balanceSpinBox->value();
-    int studentNum = ui->studentSpinBox->value() - 1;
+    QString reason = ui->balanceTextEdit->toPlainText();
 
-    stud[studentNum].changeBalance(amount);
-    updateTable(studentNum);
+    QItemSelectionModel *selections = ui->tableWidget->selectionModel();
+    QModelIndexList selected = selections->selectedIndexes();
+
+    if (selected.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
+    }
+
+    for (int i = 0; i < selected.size(); i++)
+    {
+        row = selected[i].row();
+
+        if (!stud[row].changed) {       //ensure balance not changed multiple times
+            stud[row].changeBalance(amount);
+            stud[row].addPayReason(reason);
+
+            stud[row].changed = true;
+            updateTable(row);
+        }
+    }
+
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {     //reset stud.changed
+        stud[i].changed = false;
+    }
 
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
     ui->balanceButtonBox->setVisible(false);
-    ui->studentSpinBox->setVisible(false);
+    ui->balanceTextEdit->setVisible(false);
 }
 
-void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
+void MainWindow::on_balanceButtonBox_rejected()
+{
+    ui->balanceSpinBox->setVisible(false);   //hide payment elements
+    ui->balanceButtonBox->setVisible(false);
+    ui->balanceTextEdit->setVisible(false);
+}
+
+
+void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 {
     ui->tableWidget->selectRow(row);
 }
 
 void MainWindow::on_chooseAllButton_clicked()
 {
-    ui->tableWidget->setFocus();
+    ui->tableWidget->setFocus();    //select all cells
     ui->tableWidget->selectAll();
 }
 
 void MainWindow::on_deleteStudent_triggered()
 {
     ui->tableWidget->removeRow(ui->tableWidget->currentRow());
+    studAmount--;
 }
 
+
+void MainWindow::on_actionSpeichern_triggered()
+{
+    QString databaseName("C:/Users/nicsc/Documents/MaturS/studentDatabase.db");                // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
+    QFile::remove(databaseName);
+    QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
+    database.setDatabaseName(databaseName);
+    database.open();
+
+    QSqlQuery query /*= QSqlQuery(database)*/;
+    query.exec("CREATE TABLE IF NOT EXISTS students(id integer primary key, name varchar(50), vorname varchar(50), balance float)");
+
+    for (int i = 0; i < studAmount; i++) {
+        QString name(stud[i].getName());
+        QString vorname(stud[i].getVorname());
+        double balance = stud[i].getBalance();
+
+        query.prepare("INSERT INTO students (id, name, vorname, balance) VALUES(:id, :name, :vorname, :balance)");      //in process https://katecpp.wordpress.com/2015/08/28/sqlite-with-qt/
+        query.bindValue(":id", i);
+        query.bindValue(":name", name);
+        query.bindValue(":vorname", vorname);
+        query.bindValue(":balance", balance);
+        if(!query.exec()) {
+            message.critical(this, "Error", "Query fehlgeschlagen");
+        }
+    }
+/*
+    QString yeet("test");
+    float yat = 5;
+    query.prepare("INSERT INTO students (id, name, vorname, balance) VALUES(:id, :name, :vorname, :balance)");
+    query.bindValue(":id", 1);
+    query.bindValue(":name", yeet);
+    query.bindValue(":vorname", yeet);
+    query.bindValue(":balance", yat);
+    query.exec();*/
+    /* QFile file("C:/Users/nicsc/Documents/MaturS/data.txt");
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+               return;
+
+    QTextStream out(&file);
+    for (int i = 0; i <= studAmount; i++) {
+        out << stud[i].getName() << "\t" << stud[i].getVorname() << "\t" << stud[i].getBalance() << "\n";
+    }*/
+}
+
+void MainWindow::on_actionSort_triggered()
+{
+    ui->tableWidget->setSortingEnabled(true);
+    ui->tableWidget->sortByColumn(0,Qt::AscendingOrder);
+    ui->tableWidget->setSortingEnabled(false);
+}
+
+
+void MainWindow::on_actionBeenden_triggered()
+{
+    on_quitButton_clicked();
+}
