@@ -17,11 +17,6 @@ addStudent::~addStudent()
     delete ui;
 }
 
-void addStudent::on_pushButton_clicked()
-{
-    MainWindow mainw;
-}
-
 void addStudent::on_buttonBox_accepted()
 {
     accept();

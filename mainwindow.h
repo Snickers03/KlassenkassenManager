@@ -3,10 +3,8 @@
 
 #include <QMainWindow>
 #include <QWidget>
-#include "sure.h"
-#include "addstudent.h"
-#include "student.h"
 #include <QMessageBox>
+#include "student.h"
 
 namespace Ui {
 class MainWindow;
@@ -48,14 +46,16 @@ private slots:
 
     void on_actionBeenden_triggered();
 
+    void on_action_open_triggered();
+
 private:
     Ui::MainWindow *ui;
-    Sure *sure;
     QMessageBox message;
 
     int i = 1;  //change later!!!
     Student stud[50];
     int studAmount = 1;
+    bool saved = false;
 };
 
 #endif // MAINWINDOW_H

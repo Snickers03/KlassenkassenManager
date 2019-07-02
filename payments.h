@@ -2,21 +2,29 @@
 #define PAYMENTS_H
 
 #include <QDialog>
+#include "student.h"
 
 namespace Ui {
-class payments;
+class Payments;
 }
 
-class payments : public QDialog
+class Payments : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit payments(QWidget *parent = nullptr);
-    ~payments();
+    explicit Payments(QWidget *parent = nullptr, int studNum = 0, QString name = "", QString vorname = "");
+    ~Payments();
+
+    void setLabel(int student = 0);
 
 private:
-    Ui::payments *ui;
+    Ui::Payments *ui;
+
+    int studNum;
+    QString name;
+    QString vorname;
+
 };
 
 #endif // PAYMENTS_H

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
-    <height>298</height>
+    <width>323</width>
+    <height>161</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,14 +18,14 @@
     <widget class="QLabel" name="label">
      <property name="font">
       <font>
-       <pointsize>24</pointsize>
+       <pointsize>11</pointsize>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>Sind Sie sicher?</string>
+      <string>Wollen Sie Ihre Änderungen speichern?</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -57,7 +57,7 @@
      <item>
       <widget class="QPushButton" name="quitNo">
        <property name="text">
-        <string>Abbrechen</string>
+        <string>Nein</string>
        </property>
       </widget>
      </item>

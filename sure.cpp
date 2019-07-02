@@ -20,5 +20,6 @@ void Sure::on_quitYes_clicked()
 
 void Sure::on_quitNo_clicked()
 {
-    close();
+    reject();
 }
+
