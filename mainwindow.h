@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QMessageBox>
 #include "student.h"
+#include <QtSql>
 
 namespace Ui {
 class MainWindow;
@@ -19,6 +20,8 @@ public:
     ~MainWindow();
 
     void updateTable(int row);
+
+    void addCell();
 
     bool setData(const QModelIndex &index, const QVariant &value, int role);
 
@@ -52,10 +55,14 @@ private:
     Ui::MainWindow *ui;
     QMessageBox message;
 
-    int i = 1;  //change later!!!
     Student stud[50];
     int studAmount = 1;
     bool saved = false;
+
+    QString databaseName;
+    QSqlDatabase database;
+    QSqlQuery query;
+
 };
 
 #endif // MAINWINDOW_H

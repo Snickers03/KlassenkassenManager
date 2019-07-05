@@ -9,7 +9,6 @@
 #include <QModelIndexList>
 #include <QMessageBox>
 #include <QtSql>
-#include "payments.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,9 +21,29 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balanceTextEdit->setVisible(false);
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+     ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 
-    stud[0].setVorname("Nic");      //iniatalize example
-    stud[0].setName("Schellenbaum");
+    databaseName = "studentDatabase.db";                                           // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
+    database = QSqlDatabase::addDatabase("QSQLITE");
+    database.setDatabaseName(databaseName);
+    database.open();
+    query = QSqlQuery(database);
+
+
+    QSqlTableModel *model = new QSqlTableModel(nullptr, database);      //https://stackoverflow.com/questions/13099830/qt-qtableview-sqlite-how-to-connect
+    model->setTable("students");
+    model->select();
+
+    model->removeColumn(0);         //delete id row
+    model->setHeaderData(0, Qt::Horizontal, tr("Name"));
+    model->setHeaderData(1, Qt::Horizontal, tr("Vorname"));
+    model->setHeaderData(2, Qt::Horizontal, tr("Balance"));
+
+    ui->transactionTableView->setModel(model);
+    ui->transactionTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    stud[0].setVorname("Max");      //iniatalize example
+    stud[0].setName("Mustermann");
     stud[0].setBalance(500);
 
     updateTable(0);
@@ -68,11 +87,13 @@ void MainWindow::on_addStudent_triggered()
     if (res == false)
             return;
 
-    stud[i].setVorname(addStud.getVorname());   //set object values
-    stud[i].setName(addStud.getName());
-    stud[i].setBalance(addStud.getBalance());
+    stud[studAmount].setVorname(addStud.getVorname());   //set object values
+    stud[studAmount].setName(addStud.getName());
+    stud[studAmount].setBalance(addStud.getBalance());
 
-    ui->tableWidget->insertRow(ui->tableWidget->rowCount());    //add new cell
+    addCell();
+
+   /* ui->tableWidget->insertRow(ui->tableWidget->rowCount());    //add new cell
     int currentRow = ui->tableWidget->rowCount() - 1;
 
     ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[i].getName()));
@@ -82,7 +103,7 @@ void MainWindow::on_addStudent_triggered()
 
 
     i++;
-    studAmount++;
+    studAmount++;*/
 }
 
 void MainWindow::updateTable(int row)
@@ -90,6 +111,19 @@ void MainWindow::updateTable(int row)
     ui->tableWidget->item(row, 0)->setText(stud[row].getName());
     ui->tableWidget->item(row, 1)->setText(stud[row].getVorname());
     ui->tableWidget->item(row, 2)->setText(QString::number(stud[row].getBalance()));
+}
+
+void MainWindow::addCell()
+{
+    ui->tableWidget->insertRow(ui->tableWidget->rowCount());    //add new cell
+    int currentRow = ui->tableWidget->rowCount() - 1;
+
+    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[studAmount].getName()));
+    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(stud[studAmount].getVorname()));
+    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[studAmount].getBalance())));
+    ui->tableWidget->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+    studAmount++;
 }
 
 void MainWindow::on_actionZahlung_triggered()
@@ -144,12 +178,16 @@ void MainWindow::on_balanceButtonBox_rejected()
 
 void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 {
+    ui->tableWidget->selectRow(row);
+    ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
+    /*
     Payments payments(this, row, stud[row].getName(), stud[row].getVorname());
     payments.setWindowTitle("Überblick Zahlungen");
 
     bool res = payments.exec();
     if (res == false)
             return;
+  */
 }
 
 void MainWindow::on_chooseAllButton_clicked()
@@ -165,15 +203,16 @@ void MainWindow::on_deleteStudent_triggered()
 }
 
 
-void MainWindow::on_actionSpeichern_triggered()
+void MainWindow::on_actionSpeichern_triggered() //needs fix
 {
-    QString databaseName("studentDatabase.db");                // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
-    QFile::remove(databaseName);
-    QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
-    database.setDatabaseName(databaseName);
-    database.open();
+   // database.close();
+   // QFile::remove(databaseName);             // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
+    //QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
+   //database.setDatabaseName(databaseName);
+    //database.open();
 
-    QSqlQuery query /*= QSqlQuery(database)*/;
+    //QSqlQuery query = QSqlQuery(database);
+    //database.open();
     query.exec("CREATE TABLE IF NOT EXISTS students(id integer primary key, name varchar(50), vorname varchar(50), balance float)");
 
     for (int i = 0; i < studAmount; i++) {
@@ -186,48 +225,55 @@ void MainWindow::on_actionSpeichern_triggered()
         query.bindValue(":name", name);
         query.bindValue(":vorname", vorname);
         query.bindValue(":balance", balance);
-        if(!query.exec()) {
-            message.critical(this, "Error", "Query fehlgeschlagen");
-        }
+
+        query.exec();
     }
 
-    database.close();
+    //database.close();
     saved = true;
 }
 
 void MainWindow::on_action_open_triggered()
 {
-   // QString databaseName("C:/Users/nicsc/Documents/MaturS/studentDatabase.db");
-    QString databaseName("studentDatabase.db");
-
+   /* QString databaseName("studentDatabase.db");
     QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
     database.setDatabaseName(databaseName);
-    database.open();
+    database.open();*/
 
-    QSqlQuery query("SELECT name FROM students");
-    int idName = query.record().indexOf("name");
+    query.exec("SELECT name FROM students");            //https://doc.qt.io/qt-5/qsqlquery.html#next
+    QSqlRecord rec = query.record();
+    int idName = rec.indexOf("name");
 
-    for (int i = 0; query.next() == true; i++) {
+    int i = 0;
+    while (query.next()) {
         QString name = query.value(idName).toString();
         stud[i].setName(name);
+        i++;
     }
 
-    query.prepare("SELECT vorname FROM students");
+    query.exec("SELECT vorname FROM students");
 
-    for (int i = 0; query.next() == true; i++) {
-        stud[i].setVorname(query.value(idName).toString());
+    i = 0;
+    while (query.next()) {
+        QString vorname = query.value(idName).toString();
+        stud[i].setVorname(vorname);
+        i++;
     }
 
-    query.prepare("SELECT balance FROM students");
+    query.exec("SELECT balance FROM students");
 
-    for (int i = 0; query.next() == true; i++) {
-        stud[i].setBalance(query.value(idName).toDouble());
+    i = 0;
+    while (query.next()) {
+        double balance = query.value(idName).toDouble();
+        stud[i].setBalance(balance);
+        i++;
+
+        addCell();
     }
 
-    for (int i = 0; i < idName; i++) {
+    for (int i = 0; i < studAmount; i++) {
         updateTable(i);
     }
-
 }
 
 void MainWindow::on_actionSort_triggered()

@@ -29,21 +29,18 @@ SOURCES += \
         mainwindow.cpp \
     sure.cpp \
     addstudent.cpp \
-    student.cpp \
-    payments.cpp
+    student.cpp
 
 HEADERS += \
         mainwindow.h \
     sure.h \
     addstudent.h \
-    student.h \
-    payments.h
+    student.h
 
 FORMS += \
         mainwindow.ui \
     sure.ui \
-    addstudent.ui \
-    payments.ui
+    addstudent.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
