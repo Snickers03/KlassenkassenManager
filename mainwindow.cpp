@@ -24,10 +24,12 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 
     databaseName = "studentDatabase.db";                                           // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
-    database = QSqlDatabase::addDatabase("QSQLITE");
+    database = QSqlDatabase::addDatabase("QSQLITE");            //create database
     database.setDatabaseName(databaseName);
     database.open();
     query = QSqlQuery(database);
+
+    on_action_open_triggered();     //auto-open existing database
 
 
     QSqlTableModel *model = new QSqlTableModel(nullptr, database);      //https://stackoverflow.com/questions/13099830/qt-qtableview-sqlite-how-to-connect
@@ -92,18 +94,6 @@ void MainWindow::on_addStudent_triggered()
     stud[studAmount].setBalance(addStud.getBalance());
 
     addCell();
-
-   /* ui->tableWidget->insertRow(ui->tableWidget->rowCount());    //add new cell
-    int currentRow = ui->tableWidget->rowCount() - 1;
-
-    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[i].getName()));
-    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(stud[i].getVorname()));
-    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[i].getBalance())));
-    ui->tableWidget->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-
-
-    i++;
-    studAmount++;*/
 }
 
 void MainWindow::updateTable(int row)
@@ -163,6 +153,12 @@ void MainWindow::on_balanceButtonBox_accepted()
         stud[i].changed = false;
     }
 
+
+
+    //query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, date text, reason text, amount float)");     //https://stackoverflow.com/questions/7145933/create-table-dynamic-name-of-table
+        //work in progress
+
+
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
     ui->balanceButtonBox->setVisible(false);
     ui->balanceTextEdit->setVisible(false);
@@ -180,14 +176,6 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 {
     ui->tableWidget->selectRow(row);
     ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
-    /*
-    Payments payments(this, row, stud[row].getName(), stud[row].getVorname());
-    payments.setWindowTitle("Überblick Zahlungen");
-
-    bool res = payments.exec();
-    if (res == false)
-            return;
-  */
 }
 
 void MainWindow::on_chooseAllButton_clicked()
@@ -203,16 +191,9 @@ void MainWindow::on_deleteStudent_triggered()
 }
 
 
-void MainWindow::on_actionSpeichern_triggered() //needs fix
+void MainWindow::on_actionSpeichern_triggered()
 {
-   // database.close();
-   // QFile::remove(databaseName);             // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
-    //QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
-   //database.setDatabaseName(databaseName);
-    //database.open();
-
-    //QSqlQuery query = QSqlQuery(database);
-    //database.open();
+    query.exec("DROP TABLE students");
     query.exec("CREATE TABLE IF NOT EXISTS students(id integer primary key, name varchar(50), vorname varchar(50), balance float)");
 
     for (int i = 0; i < studAmount; i++) {
@@ -220,7 +201,7 @@ void MainWindow::on_actionSpeichern_triggered() //needs fix
         QString vorname(stud[i].getVorname());
         double balance = stud[i].getBalance();
 
-        query.prepare("INSERT INTO students (id, name, vorname, balance) VALUES(:id, :name, :vorname, :balance)");      //in process https://katecpp.wordpress.com/2015/08/28/sqlite-with-qt/
+        query.prepare("INSERT INTO students (id, name, vorname, balance) VALUES(:id, :name, :vorname, :balance)");      //https://katecpp.wordpress.com/2015/08/28/sqlite-with-qt/
         query.bindValue(":id", i);
         query.bindValue(":name", name);
         query.bindValue(":vorname", vorname);
@@ -229,16 +210,13 @@ void MainWindow::on_actionSpeichern_triggered() //needs fix
         query.exec();
     }
 
-    //database.close();
     saved = true;
 }
 
 void MainWindow::on_action_open_triggered()
 {
-   /* QString databaseName("studentDatabase.db");
-    QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
-    database.setDatabaseName(databaseName);
-    database.open();*/
+    ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
+    studAmount = 0;
 
     query.exec("SELECT name FROM students");            //https://doc.qt.io/qt-5/qsqlquery.html#next
     QSqlRecord rec = query.record();
@@ -246,7 +224,7 @@ void MainWindow::on_action_open_triggered()
 
     int i = 0;
     while (query.next()) {
-        QString name = query.value(idName).toString();
+        QString name = query.value(idName).toString();          //load names
         stud[i].setName(name);
         i++;
     }
@@ -255,7 +233,7 @@ void MainWindow::on_action_open_triggered()
 
     i = 0;
     while (query.next()) {
-        QString vorname = query.value(idName).toString();
+        QString vorname = query.value(idName).toString();       //load vornames
         stud[i].setVorname(vorname);
         i++;
     }
@@ -264,7 +242,7 @@ void MainWindow::on_action_open_triggered()
 
     i = 0;
     while (query.next()) {
-        double balance = query.value(idName).toDouble();
+        double balance = query.value(idName).toDouble();        //load balances
         stud[i].setBalance(balance);
         i++;
 

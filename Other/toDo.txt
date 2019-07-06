@@ -4,6 +4,8 @@
 -Speicher- & Ladefunktion
 	(Excel)
 
+-Druckfunktion
+
 -bessere Auswahl der Schüler
 
 -responsive
