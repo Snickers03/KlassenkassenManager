@@ -153,10 +153,14 @@ void MainWindow::on_balanceButtonBox_accepted()
         stud[i].changed = false;
     }
 
+    query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, date text, reason text, amount float)");     //https://stackoverflow.com/questions/7145933/create-table-dynamic-name-of-table
+    query.prepare("INSERT INTO payments(id, date, reason, amount) VALUES(NULL, NULL, :reason, :amount)");   //change "NULL"
+    query.bindValue(":reason", reason);
+    query.bindValue(":amount", amount);
 
-
-    //query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, date text, reason text, amount float)");     //https://stackoverflow.com/questions/7145933/create-table-dynamic-name-of-table
-        //work in progress
+    if (!query.exec()) {
+        message.critical(this, "Error", "yeet query");
+    }
 
 
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
@@ -207,7 +211,9 @@ void MainWindow::on_actionSpeichern_triggered()
         query.bindValue(":vorname", vorname);
         query.bindValue(":balance", balance);
 
-        query.exec();
+        if (!query.exec()) {
+            message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
+        }
     }
 
     saved = true;
