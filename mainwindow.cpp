@@ -32,12 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     on_action_open_triggered();     //auto-open existing database
 
     ui->payTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    /*stud[0].setVorname("Max");      //iniatalize example      //causes crash if no database exists yet
-    stud[0].setName("Mustermann");
-    stud[0].setBalance(500);
-
-    updateTable(0);*/
 }
 
 MainWindow::~MainWindow()
