@@ -9,3 +9,6 @@
 -bessere Auswahl der Schüler
 
 -responsive
+
+Bugs:
+	-Zahlungen automatisch gespeichert, Schüler hinzufügen/löschen nicht

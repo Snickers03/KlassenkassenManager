@@ -31,20 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     on_action_open_triggered();     //auto-open existing database
 
-
-    /*model = new QSqlTableModel(this, database);      //https://stackoverflow.com/questions/13099830/qt-qtableview-sqlite-how-to-connect
-    model->setTable("payments");
-    model->select();
-
-    model->removeColumn(0);
-    model->removeColumn(1);                                         //delete id row
-    model->removeColumns(0, 2);    */    //change later
-    model->setHeaderData(0, Qt::Horizontal, tr("Datum"));
-    model->setHeaderData(1, Qt::Horizontal, tr("Zahlungsgrund"));
-    model->setHeaderData(2, Qt::Horizontal, tr("Menge"));
-
-    //ui->transactionTableView->setModel(model);
-    ui->transactionTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->payTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     /*stud[0].setVorname("Max");      //iniatalize example      //causes crash if no database exists yet
     stud[0].setName("Mustermann");
@@ -187,14 +174,55 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
     ui->tableWidget->selectRow(row);
     ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
 
-    ui->transactionTableView->model()->removeRows(0, ui->transactionTableView->rowCount())
+    ui->payTable->model()->removeRows(0, ui->payTable->rowCount());
+    int currentRow = 0;
 
-   /* query.exec("SELECT studId from payments)");              //https://www.techonthenet.com/sql/tables/create_table2.php
-    query.bindValue(":id", row);                                                                                                                      // https://www.qtcentre.org/threads/35746-QSqlQuery-bindValue-and-SELECT-WHERE-IN
+    query.prepare("SELECT * FROM payments WHERE studId = :row");
+    query.bindValue(":row", row);
+    query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
 
-    if (!query.exec()) {
-        message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
-    }*/
+    QSqlRecord rec = query.record();
+    int idName = rec.indexOf("reason");
+
+    while (query.next()) {
+        QString reason = query.value(idName).toString();
+
+        ui->payTable->insertRow(ui->payTable->rowCount());
+        currentRow = ui->payTable->rowCount() - 1;
+        ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
+    }
+
+    query.prepare("SELECT * FROM payments WHERE studId = :row");
+    query.bindValue(":row", row);
+    query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
+
+    rec = query.record();
+    idName = rec.indexOf("amount");
+    currentRow = 0;
+
+    while (query.next()) {
+        double amount = query.value(idName).toDouble();
+
+        ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount)));
+        currentRow++;
+    }
+
+    query.prepare("SELECT * FROM payments WHERE studId = :row");
+    query.bindValue(":row", row);
+    query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
+
+    rec = query.record();
+    idName = rec.indexOf("date");
+    currentRow = 0;
+
+    while (query.next()) {
+        QString date = query.value(idName).toString();
+
+        ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
+        currentRow++;
+    }
+
+    ui->tableWidget->clearSelection();
 }
 
 void MainWindow::on_chooseAllButton_clicked()
