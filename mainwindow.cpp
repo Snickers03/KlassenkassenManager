@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balanceTextEdit->setVisible(false);
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-     ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 
     databaseName = "studentDatabase.db";                                           // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
     database = QSqlDatabase::addDatabase("QSQLITE");            //create database
@@ -32,23 +32,25 @@ MainWindow::MainWindow(QWidget *parent) :
     on_action_open_triggered();     //auto-open existing database
 
 
-    QSqlTableModel *model = new QSqlTableModel(nullptr, database);      //https://stackoverflow.com/questions/13099830/qt-qtableview-sqlite-how-to-connect
-    model->setTable("students");
+    /*model = new QSqlTableModel(this, database);      //https://stackoverflow.com/questions/13099830/qt-qtableview-sqlite-how-to-connect
+    model->setTable("payments");
     model->select();
 
-    model->removeColumn(0);         //delete id row
-    model->setHeaderData(0, Qt::Horizontal, tr("Name"));
-    model->setHeaderData(1, Qt::Horizontal, tr("Vorname"));
-    model->setHeaderData(2, Qt::Horizontal, tr("Balance"));
+    model->removeColumn(0);
+    model->removeColumn(1);                                         //delete id row
+    model->removeColumns(0, 2);    */    //change later
+    model->setHeaderData(0, Qt::Horizontal, tr("Datum"));
+    model->setHeaderData(1, Qt::Horizontal, tr("Zahlungsgrund"));
+    model->setHeaderData(2, Qt::Horizontal, tr("Menge"));
 
-    ui->transactionTableView->setModel(model);
+    //ui->transactionTableView->setModel(model);
     ui->transactionTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    stud[0].setVorname("Max");      //iniatalize example
+    /*stud[0].setVorname("Max");      //iniatalize example      //causes crash if no database exists yet
     stud[0].setName("Mustermann");
     stud[0].setBalance(500);
 
-    updateTable(0);
+    updateTable(0);*/
 }
 
 MainWindow::~MainWindow()
@@ -132,6 +134,8 @@ void MainWindow::on_balanceButtonBox_accepted()
     QItemSelectionModel *selections = ui->tableWidget->selectionModel();
     QModelIndexList selected = selections->selectedIndexes();
 
+    query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, studId integer, date text, reason text, amount float)");
+
     if (selected.size() == 0) {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
     }
@@ -146,6 +150,15 @@ void MainWindow::on_balanceButtonBox_accepted()
 
             stud[row].changed = true;
             updateTable(row);
+
+            query.prepare("INSERT INTO payments(id, studId, date, reason, amount) VALUES(NULL, :studId, strftime('%d/%m/%Y', 'now'), :reason, :amount)");   //change "NULL"
+            query.bindValue(":studId", row);
+            query.bindValue(":reason", reason);             //https://stackoverflow.com/questions/32962493/how-to-save-date-type-data-as-string-with-format-dd-mm-yyyy-in-sqlite?rq=1
+            query.bindValue(":amount", amount);          //https://stackoverflow.com/questions/7145933/create-table-dynamic-name-of-table
+
+            if (!query.exec()) {
+                message.critical(this, "Error", "yeet query");
+            }
         }
     }
 
@@ -153,19 +166,12 @@ void MainWindow::on_balanceButtonBox_accepted()
         stud[i].changed = false;
     }
 
-    query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, date text, reason text, amount float)");     //https://stackoverflow.com/questions/7145933/create-table-dynamic-name-of-table
-    query.prepare("INSERT INTO payments(id, date, reason, amount) VALUES(NULL, NULL, :reason, :amount)");   //change "NULL"
-    query.bindValue(":reason", reason);
-    query.bindValue(":amount", amount);
-
-    if (!query.exec()) {
-        message.critical(this, "Error", "yeet query");
-    }
-
-
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
     ui->balanceButtonBox->setVisible(false);
     ui->balanceTextEdit->setVisible(false);
+
+    //model->select();
+    //ui->transactionTableView->setModel(model);
 }
 
 void MainWindow::on_balanceButtonBox_rejected()
@@ -180,6 +186,15 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 {
     ui->tableWidget->selectRow(row);
     ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
+
+    ui->transactionTableView->model()->removeRows(0, ui->transactionTableView->rowCount())
+
+   /* query.exec("SELECT studId from payments)");              //https://www.techonthenet.com/sql/tables/create_table2.php
+    query.bindValue(":id", row);                                                                                                                      // https://www.qtcentre.org/threads/35746-QSqlQuery-bindValue-and-SELECT-WHERE-IN
+
+    if (!query.exec()) {
+        message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
+    }*/
 }
 
 void MainWindow::on_chooseAllButton_clicked()

@@ -62,7 +62,7 @@ private:
     QString databaseName;
     QSqlDatabase database;
     QSqlQuery query;
-
+    QSqlTableModel *model;
 };
 
 #endif // MAINWINDOW_H
