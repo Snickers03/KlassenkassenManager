@@ -398,6 +398,9 @@
    <addaction name="menuBearbeiten"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>

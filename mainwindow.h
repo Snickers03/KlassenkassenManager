@@ -58,6 +58,7 @@ private:
     Student stud[50];
     int studAmount = 1;
     bool saved = false;
+    QString order = "name";
 
     QString databaseName;
     QSqlDatabase database;

@@ -9,6 +9,8 @@
 #include <QModelIndexList>
 #include <QMessageBox>
 #include <QtSql>
+#include <algorithm>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -132,10 +134,20 @@ void MainWindow::on_balanceButtonBox_accepted()
             stud[row].changed = true;
             updateTable(row);
 
-            query.prepare("INSERT INTO payments(id, studId, date, reason, amount) VALUES(NULL, :studId, strftime('%d/%m/%Y', 'now'), :reason, :amount)");   //change "NULL"
-            query.bindValue(":studId", row);
+            QString name(stud[row].getName());
+            QString vorname(stud[row].getVorname());
+
+            query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
+            query.bindValue(":name", name);
+            query.bindValue(":vorname", vorname);
+            query.exec();
+            query.next();
+            int id = query.value(0).toInt();
+
+            query.prepare("INSERT INTO payments(id, studId, date, reason, amount) VALUES(NULL, :studId, strftime('%d/%m/%Y', 'now'), :reason, :amount)");
+            query.bindValue(":studId", id);
             query.bindValue(":reason", reason);             //https://stackoverflow.com/questions/32962493/how-to-save-date-type-data-as-string-with-format-dd-mm-yyyy-in-sqlite?rq=1
-            query.bindValue(":amount", amount);          //https://stackoverflow.com/questions/7145933/create-table-dynamic-name-of-table
+            query.bindValue(":amount", amount);
 
             if (!query.exec()) {
                 message.critical(this, "Error", "yeet query");
@@ -168,11 +180,21 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
     ui->tableWidget->selectRow(row);
     ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
 
-    ui->payTable->model()->removeRows(0, ui->payTable->rowCount());
+    ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
     int currentRow = 0;
 
-    query.prepare("SELECT * FROM payments WHERE studId = :row");
-    query.bindValue(":row", row);
+    QString name(stud[row].getName());
+    QString vorname(stud[row].getVorname());
+
+    query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
+    query.bindValue(":name", name);
+    query.bindValue(":vorname", vorname);
+    query.exec();
+    query.next();
+    int id = query.value(0).toInt();
+
+    query.prepare("SELECT * FROM payments WHERE studId = :id");
+    query.bindValue(":id", id);
     query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
 
     QSqlRecord rec = query.record();
@@ -186,8 +208,8 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
         ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
     }
 
-    query.prepare("SELECT * FROM payments WHERE studId = :row");
-    query.bindValue(":row", row);
+    query.prepare("SELECT * FROM payments WHERE studId = :id");
+    query.bindValue(":id", id);
     query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
 
     rec = query.record();
@@ -201,8 +223,8 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
         currentRow++;
     }
 
-    query.prepare("SELECT * FROM payments WHERE studId = :row");
-    query.bindValue(":row", row);
+    query.prepare("SELECT * FROM payments WHERE studId = :id");
+    query.bindValue(":id", id);
     query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
 
     rec = query.record();
@@ -261,7 +283,7 @@ void MainWindow::on_action_open_triggered()
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
     studAmount = 0;
 
-    query.exec("SELECT name FROM students");            //https://doc.qt.io/qt-5/qsqlquery.html#next
+    query.exec("SELECT name FROM students ORDER BY name");            //https://doc.qt.io/qt-5/qsqlquery.html#next
     QSqlRecord rec = query.record();
     int idName = rec.indexOf("name");
 
@@ -272,7 +294,7 @@ void MainWindow::on_action_open_triggered()
         i++;
     }
 
-    query.exec("SELECT vorname FROM students");
+    query.exec("SELECT vorname FROM students ORDER BY name");
 
     i = 0;
     while (query.next()) {
@@ -281,7 +303,7 @@ void MainWindow::on_action_open_triggered()
         i++;
     }
 
-    query.exec("SELECT balance FROM students");
+    query.exec("SELECT balance FROM students ORDER BY name");
 
     i = 0;
     while (query.next()) {
@@ -299,9 +321,19 @@ void MainWindow::on_action_open_triggered()
 
 void MainWindow::on_actionSort_triggered()
 {
-    ui->tableWidget->setSortingEnabled(true);
+    /*ui->tableWidget->setSortingEnabled(true);                   //https://stackoverflow.com/questions/10079750/how-to-sort-values-in-columns-and-update-table
     ui->tableWidget->sortByColumn(0,Qt::AscendingOrder);
-    ui->tableWidget->setSortingEnabled(false);
+    ui->tableWidget->setSortingEnabled(false);*/
+    /*QString order = "name";
+
+    query.prepare("CREATE TABLE sub AS SELECT * FROM students ORDER BY :order");
+    query.bindValue(":order", order);
+
+    if (!query.exec()) {
+        message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
+    }
+
+    query.exec("DROP TABLE students");*/
 }
 
 
