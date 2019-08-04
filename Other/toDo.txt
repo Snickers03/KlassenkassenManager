@@ -15,6 +15,11 @@
 Problem: id von row in TableWidget abhängig -> nicht gleich nach sort
 	 studId -> id muss gleich bleiben
 
+
+
 Bugs:
 	-Zahlungen automatisch gespeichert, Schüler hinzufügen/löschen nicht
 	-bei Löschen stimmen Schüler/Zahlugen nicht mehr überein
+
+
+Student object array in mainWindow, payment object array in student -> jeder student eigenes payment object array 

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include "payments.h"
 
 class Student
 {
@@ -21,13 +22,15 @@ public:
     void changeBalance(double amount);
     bool changed = false;
 
-    void addPayReason(QString reason);
+    Payments pay[50];
+    int payCount;
 
 private:
     QString vorname;
     QString name;
     double balance;
-    QVector<QString> payments;
+
+   // QVector<QString> payments;
 };
 
 #endif // STUDENT_H

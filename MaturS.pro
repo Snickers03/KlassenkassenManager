@@ -27,12 +27,14 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+    payments.cpp \
     sure.cpp \
     addstudent.cpp \
     student.cpp
 
 HEADERS += \
         mainwindow.h \
+    payments.h \
     sure.h \
     addstudent.h \
     student.h

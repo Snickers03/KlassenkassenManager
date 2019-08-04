@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QtSql>
 #include <algorithm>
+#include <QDate>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -78,6 +79,14 @@ void MainWindow::on_addStudent_triggered()
     stud[studAmount].setName(addStud.getName());
     stud[studAmount].setBalance(addStud.getBalance());
 
+    QDate currentDate = QDate::currentDate();           //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
+    QString date = currentDate.toString("dd.MM.yy");
+
+    stud[studAmount].pay[0].setDate(date);              //save initial payment
+    stud[studAmount].pay[0].setReason("Anfangsbestand");
+    stud[studAmount].pay[0].setAmount(addStud.getBalance());
+    stud[studAmount].payCount++;
+
     addCell();
 }
 
@@ -114,10 +123,13 @@ void MainWindow::on_balanceButtonBox_accepted()
     double amount = ui->balanceSpinBox->value();
     QString reason = ui->balanceTextEdit->toPlainText();
 
+    QDate currentDate = QDate::currentDate();           //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
+    QString date = currentDate.toString("dd.MM.yy");
+
     QItemSelectionModel *selections = ui->tableWidget->selectionModel();
     QModelIndexList selected = selections->selectedIndexes();
 
-    query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, studId integer, date text, reason text, amount float)");
+    //query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, studId integer, date text, reason text, amount float)");
 
     if (selected.size() == 0) {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
@@ -129,12 +141,17 @@ void MainWindow::on_balanceButtonBox_accepted()
 
         if (!stud[row].changed) {       //ensure balance not changed multiple times
             stud[row].changeBalance(amount);
-            stud[row].addPayReason(reason);
 
+            int payCount = stud[row].payCount;
+            stud[row].pay[payCount].setReason(reason);
+            stud[row].pay[payCount].setDate(date);
+            stud[row].pay[payCount].setAmount(amount);
+
+            stud[row].payCount++;
             stud[row].changed = true;
             updateTable(row);
 
-            QString name(stud[row].getName());
+            /*QString name(stud[row].getName());
             QString vorname(stud[row].getVorname());
 
             query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
@@ -147,7 +164,7 @@ void MainWindow::on_balanceButtonBox_accepted()
             query.prepare("INSERT INTO payments(id, studId, date, reason, amount) VALUES(NULL, :studId, strftime('%d/%m/%Y', 'now'), :reason, :amount)");
             query.bindValue(":studId", id);
             query.bindValue(":reason", reason);             //https://stackoverflow.com/questions/32962493/how-to-save-date-type-data-as-string-with-format-dd-mm-yyyy-in-sqlite?rq=1
-            query.bindValue(":amount", amount);
+            query.bindValue(":amount", amount);*/
 
             if (!query.exec()) {
                 message.critical(this, "Error", "yeet query");
@@ -177,16 +194,31 @@ void MainWindow::on_balanceButtonBox_rejected()
 
 void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 {
+    selectedStudent = row;
     ui->tableWidget->selectRow(row);
     ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
 
     ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
     int currentRow = 0;
 
-    QString name(stud[row].getName());
-    QString vorname(stud[row].getVorname());
+   // QString name(stud[row].getName());
+   // QString vorname(stud[row].getVorname());
 
-    query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
+    for(int i = 0; i < stud[row].payCount; i++) {
+
+        QString date = stud[row].pay[i].getDate();
+        QString reason = stud[row].pay[i].getReason();
+        double amount = stud[row].pay[i].getAmount();
+
+        ui->payTable->insertRow(ui->payTable->rowCount());
+        currentRow = ui->payTable->rowCount() - 1;
+
+        ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
+        ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
+        ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount)));
+    }
+
+    /* query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
     query.bindValue(":name", name);
     query.bindValue(":vorname", vorname);
     query.exec();
@@ -236,7 +268,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 
         ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
         currentRow++;
-    }
+    }*/
 
     ui->tableWidget->clearSelection();
 }
@@ -249,8 +281,32 @@ void MainWindow::on_chooseAllButton_clicked()
 
 void MainWindow::on_deleteStudent_triggered()
 {
-    ui->tableWidget->removeRow(ui->tableWidget->currentRow());
-    studAmount--;
+    int row = ui->tableWidget->currentRow();
+
+    if (ui->tableWidget->hasFocus())
+    {
+        ui->tableWidget->removeRow(row);
+        studAmount--;
+
+        for (int i = row; i < studAmount; i++) {        //push back following objects
+            stud[i] = stud[i + 1];
+        }
+    }
+    else if (ui->payTable->hasFocus())
+    {
+        int payRow = ui->payTable->currentRow();
+        ui->payTable->removeRow(payRow);
+        stud[selectedStudent].payCount--;
+        stud[selectedStudent].changeBalance(-stud[selectedStudent].pay[payRow].getAmount());        //change balance
+        updateTable(selectedStudent);
+
+        for (int i = payRow; i < stud[selectedStudent].payCount; i++) {
+            stud[selectedStudent].pay[i] = stud[selectedStudent].pay[i + 1];
+        }
+    }
+    else {
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");
+    }
 }
 
 
@@ -258,6 +314,9 @@ void MainWindow::on_actionSpeichern_triggered()
 {
     query.exec("DROP TABLE students");
     query.exec("CREATE TABLE IF NOT EXISTS students(id integer primary key, name varchar(50), vorname varchar(50), balance float)");
+
+    query.exec("DROP TABLE payments");
+    query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, studId integer, date text, reason text, amount float)");
 
     for (int i = 0; i < studAmount; i++) {
         QString name(stud[i].getName());
@@ -273,6 +332,22 @@ void MainWindow::on_actionSpeichern_triggered()
         if (!query.exec()) {
             message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
         }
+
+        for (int j = 0; j < stud[i].payCount; j++) {
+            QString reason(stud[i].pay[j].getReason());
+            QString date(stud[i].pay[j].getDate());
+            double amount = stud[i].pay[j].getAmount();
+
+            query.prepare("INSERT INTO payments (id, studId, date, reason, amount) VALUES(NULL, :studId, :date, :reason, :amount)");
+            query.bindValue(":studId", i);
+            query.bindValue(":date", date);
+            query.bindValue(":reason", reason);
+            query.bindValue(":amount", amount);
+
+            if (!query.exec()) {
+                message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
+            }
+        }
     }
 
     saved = true;
@@ -283,39 +358,95 @@ void MainWindow::on_action_open_triggered()
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
     studAmount = 0;
 
-    query.exec("SELECT name FROM students ORDER BY name");            //https://doc.qt.io/qt-5/qsqlquery.html#next
+    query.prepare("SELECT name FROM students ORDER BY CASE "
+                  "WHEN :sort = 1 THEN name "
+                  "WHEN :sort = 2 THEN vorname "
+                  "WHEN :sort = 3 THEN balance "
+                  "END");                                                                               //https://doc.qt.io/qt-5/qsqlquery.html#next
+    query.bindValue(":sort", sort);                                                                     //https://www.sqlteam.com/articles/dynamic-order-by
+    query.exec();
+
     QSqlRecord rec = query.record();
     int idName = rec.indexOf("name");
 
-    int i = 0;
-    while (query.next()) {
+    for (int i = 0; query.next(); i++) {
         QString name = query.value(idName).toString();          //load names
         stud[i].setName(name);
-        i++;
     }
 
-    query.exec("SELECT vorname FROM students ORDER BY name");
+    //query.exec("SELECT vorname FROM students ORDER BY name");
+    query.prepare("SELECT vorname FROM students ORDER BY CASE "
+                  "WHEN :sort = 1 THEN name "
+                  "WHEN :sort = 2 THEN vorname "
+                  "WHEN :sort = 3 THEN balance "
+                  "END");                                                                               //https://doc.qt.io/qt-5/qsqlquery.html#next
+    query.bindValue(":sort", sort);
+    query.exec();
 
-    i = 0;
-    while (query.next()) {
+    for (int i = 0; query.next(); i++) {
         QString vorname = query.value(idName).toString();       //load vornames
-        stud[i].setVorname(vorname);
-        i++;
+        stud[i].setVorname(vorname);   
     }
 
-    query.exec("SELECT balance FROM students ORDER BY name");
+    //query.exec("SELECT balance FROM students ORDER BY name");
+    query.prepare("SELECT balance FROM students ORDER BY CASE "
+                  "WHEN :sort = 1 THEN name "
+                  "WHEN :sort = 2 THEN vorname "
+                  "WHEN :sort = 3 THEN balance "
+                  "END");                                                                               //https://doc.qt.io/qt-5/qsqlquery.html#next
+    query.bindValue(":sort", sort);
+    query.exec();
 
-    i = 0;
-    while (query.next()) {
+    for (int i = 0; query.next(); i++) {
         double balance = query.value(idName).toDouble();        //load balances
         stud[i].setBalance(balance);
-        i++;
-
         addCell();
     }
 
     for (int i = 0; i < studAmount; i++) {
         updateTable(i);
+
+        ////////////////////////////////////////////////////////
+        // load payments
+        stud[i].payCount = 0;               //reset pay count
+
+        query.prepare("SELECT * FROM payments WHERE studId = :id");
+        query.bindValue(":id", i);
+        query.exec();
+
+        rec = query.record();
+        idName = rec.indexOf("reason");
+
+        for (int j = 0; query.next(); j++) {
+            QString reason = query.value(idName).toString();
+            stud[i].pay[j].setReason(reason);
+        }
+
+        query.prepare("SELECT * FROM payments WHERE studId = :id");
+        query.bindValue(":id", i);
+        query.exec();
+
+        rec = query.record();
+        idName = rec.indexOf("date");
+
+        for (int j = 0; query.next(); j++) {
+            QString date = query.value(idName).toString();
+            stud[i].pay[j].setDate(date);
+        }
+
+        query.prepare("SELECT * FROM payments WHERE studId = :id");
+        query.bindValue(":id", i);
+        query.exec();
+
+        rec = query.record();
+        idName = rec.indexOf("amount");
+
+        for (int j = 0; query.next(); j++) {
+            double amount = query.value(idName).toDouble();
+            stud[i].pay[j].setAmount(amount);
+
+            stud[i].payCount++;
+        }
     }
 }
 
