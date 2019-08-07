@@ -17,9 +17,14 @@ Problem: id von row in TableWidget abhängig -> nicht gleich nach sort
 
 
 
+
+
 Bugs:
 	-Zahlungen automatisch gespeichert, Schüler hinzufügen/löschen nicht
 	-bei Löschen stimmen Schüler/Zahlugen nicht mehr überein
 
 
-Student object array in mainWindow, payment object array in student -> jeder student eigenes payment object array 
+Student object array in mainWindow, payment object array in student -> jeder student eigenes payment object array
+
+
+Schüler sortiert, Zahlungen bleiben auf gleicher Position -> stimmt nicht mehr überein 

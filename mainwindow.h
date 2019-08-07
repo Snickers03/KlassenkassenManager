@@ -43,13 +43,19 @@ private slots:
 
     void on_actionSpeichern_triggered();
 
-    void on_actionSort_triggered();
-
     void on_balanceButtonBox_rejected();
 
     void on_actionBeenden_triggered();
 
     void on_action_open_triggered();
+
+    void on_actionName_triggered();
+
+    void on_actionVorname_triggered();
+
+    void on_actionGuthaben_triggered();
+
+    void on_clearSelectionButton_clicked();
 
 private:
     Ui::MainWindow *ui;

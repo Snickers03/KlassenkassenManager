@@ -75,14 +75,14 @@ void MainWindow::on_addStudent_triggered()
     if (res == false)
             return;
 
-    stud[studAmount].setVorname(addStud.getVorname());   //set object values
+    stud[studAmount].setVorname(addStud.getVorname());          //set object values
     stud[studAmount].setName(addStud.getName());
     stud[studAmount].setBalance(addStud.getBalance());
 
-    QDate currentDate = QDate::currentDate();           //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
+    QDate currentDate = QDate::currentDate();                   //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
     QString date = currentDate.toString("dd.MM.yy");
 
-    stud[studAmount].pay[0].setDate(date);              //save initial payment
+    stud[studAmount].pay[0].setDate(date);                     //save initial payment
     stud[studAmount].pay[0].setReason("Anfangsbestand");
     stud[studAmount].pay[0].setAmount(addStud.getBalance());
     stud[studAmount].payCount++;
@@ -94,7 +94,14 @@ void MainWindow::updateTable(int row)
 {
     ui->tableWidget->item(row, 0)->setText(stud[row].getName());
     ui->tableWidget->item(row, 1)->setText(stud[row].getVorname());
-    ui->tableWidget->item(row, 2)->setText(QString::number(stud[row].getBalance()));
+    ui->tableWidget->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));        //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
+
+    double total = 0;
+
+    for (int i = 0; i < studAmount; i++) {
+        total += stud[i].getBalance();
+    }
+    ui->totalLineEdit->setText(QString::number(total, 'f', 2));
 }
 
 void MainWindow::addCell()
@@ -104,10 +111,17 @@ void MainWindow::addCell()
 
     ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[studAmount].getName()));
     ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(stud[studAmount].getVorname()));
-    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[studAmount].getBalance())));
+    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[studAmount].getBalance(), 'f', 2)));
     ui->tableWidget->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
     studAmount++;
+
+    double total = 0;
+
+    for (int i = 0; i < studAmount; i++) {
+        total += stud[i].getBalance();
+    }
+    ui->totalLineEdit->setText(QString::number(total, 'f', 2));
 }
 
 void MainWindow::on_actionZahlung_triggered()
@@ -129,8 +143,6 @@ void MainWindow::on_balanceButtonBox_accepted()
     QItemSelectionModel *selections = ui->tableWidget->selectionModel();
     QModelIndexList selected = selections->selectedIndexes();
 
-    //query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, studId integer, date text, reason text, amount float)");
-
     if (selected.size() == 0) {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
     }
@@ -151,21 +163,6 @@ void MainWindow::on_balanceButtonBox_accepted()
             stud[row].changed = true;
             updateTable(row);
 
-            /*QString name(stud[row].getName());
-            QString vorname(stud[row].getVorname());
-
-            query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
-            query.bindValue(":name", name);
-            query.bindValue(":vorname", vorname);
-            query.exec();
-            query.next();
-            int id = query.value(0).toInt();
-
-            query.prepare("INSERT INTO payments(id, studId, date, reason, amount) VALUES(NULL, :studId, strftime('%d/%m/%Y', 'now'), :reason, :amount)");
-            query.bindValue(":studId", id);
-            query.bindValue(":reason", reason);             //https://stackoverflow.com/questions/32962493/how-to-save-date-type-data-as-string-with-format-dd-mm-yyyy-in-sqlite?rq=1
-            query.bindValue(":amount", amount);*/
-
             if (!query.exec()) {
                 message.critical(this, "Error", "yeet query");
             }
@@ -176,12 +173,12 @@ void MainWindow::on_balanceButtonBox_accepted()
         stud[i].changed = false;
     }
 
+    ui->balanceSpinBox->setValue(0);
+    ui->balanceTextEdit->setText("");
+
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
     ui->balanceButtonBox->setVisible(false);
     ui->balanceTextEdit->setVisible(false);
-
-    //model->select();
-    //ui->transactionTableView->setModel(model);
 }
 
 void MainWindow::on_balanceButtonBox_rejected()
@@ -200,9 +197,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 
     ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
     int currentRow = 0;
-
-   // QString name(stud[row].getName());
-   // QString vorname(stud[row].getVorname());
+    double total = 0;           //current balance
 
     for(int i = 0; i < stud[row].payCount; i++) {
 
@@ -215,61 +210,13 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 
         ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
         ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
-        ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount)));
+        ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
+        ui->payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+        total += amount;
     }
 
-    /* query.prepare("SELECT id FROM students WHERE name = :name AND vorname = :vorname");     //get id from students
-    query.bindValue(":name", name);
-    query.bindValue(":vorname", vorname);
-    query.exec();
-    query.next();
-    int id = query.value(0).toInt();
-
-    query.prepare("SELECT * FROM payments WHERE studId = :id");
-    query.bindValue(":id", id);
-    query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
-
-    QSqlRecord rec = query.record();
-    int idName = rec.indexOf("reason");
-
-    while (query.next()) {
-        QString reason = query.value(idName).toString();
-
-        ui->payTable->insertRow(ui->payTable->rowCount());
-        currentRow = ui->payTable->rowCount() - 1;
-        ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
-    }
-
-    query.prepare("SELECT * FROM payments WHERE studId = :id");
-    query.bindValue(":id", id);
-    query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
-
-    rec = query.record();
-    idName = rec.indexOf("amount");
-    currentRow = 0;
-
-    while (query.next()) {
-        double amount = query.value(idName).toDouble();
-
-        ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount)));
-        currentRow++;
-    }
-
-    query.prepare("SELECT * FROM payments WHERE studId = :id");
-    query.bindValue(":id", id);
-    query.exec();                                                //https://www.techonthenet.com/sql/tables/create_table2.php
-
-    rec = query.record();
-    idName = rec.indexOf("date");
-    currentRow = 0;
-
-    while (query.next()) {
-        QString date = query.value(idName).toString();
-
-        ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
-        currentRow++;
-    }*/
-
+    ui->balanceLineEdit->setText(QString::number(total, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
     ui->tableWidget->clearSelection();
 }
 
@@ -277,6 +224,11 @@ void MainWindow::on_chooseAllButton_clicked()
 {
     ui->tableWidget->setFocus();    //select all cells
     ui->tableWidget->selectAll();
+}
+
+void MainWindow::on_clearSelectionButton_clicked()
+{
+    ui->tableWidget->clearSelection();
 }
 
 void MainWindow::on_deleteStudent_triggered()
@@ -287,6 +239,7 @@ void MainWindow::on_deleteStudent_triggered()
     {
         ui->tableWidget->removeRow(row);
         studAmount--;
+        stud[row].payCount = 0;
 
         for (int i = row; i < studAmount; i++) {        //push back following objects
             stud[i] = stud[i + 1];
@@ -374,7 +327,6 @@ void MainWindow::on_action_open_triggered()
         stud[i].setName(name);
     }
 
-    //query.exec("SELECT vorname FROM students ORDER BY name");
     query.prepare("SELECT vorname FROM students ORDER BY CASE "
                   "WHEN :sort = 1 THEN name "
                   "WHEN :sort = 2 THEN vorname "
@@ -388,7 +340,6 @@ void MainWindow::on_action_open_triggered()
         stud[i].setVorname(vorname);   
     }
 
-    //query.exec("SELECT balance FROM students ORDER BY name");
     query.prepare("SELECT balance FROM students ORDER BY CASE "
                   "WHEN :sort = 1 THEN name "
                   "WHEN :sort = 2 THEN vorname "
@@ -403,6 +354,20 @@ void MainWindow::on_action_open_triggered()
         addCell();
     }
 
+    query.prepare("SELECT id FROM students ORDER BY CASE "
+                  "WHEN :sort = 1 THEN name "
+                  "WHEN :sort = 2 THEN vorname "
+                  "WHEN :sort = 3 THEN balance "
+                  "END");
+    query.bindValue(":sort", sort);
+    query.exec();
+
+    int order[50];
+
+    for (int i = 0; query.next(); i++) {
+        order[i] = query.value(idName).toInt();             //get new student order -> match payments
+    }
+
     for (int i = 0; i < studAmount; i++) {
         updateTable(i);
 
@@ -411,7 +376,7 @@ void MainWindow::on_action_open_triggered()
         stud[i].payCount = 0;               //reset pay count
 
         query.prepare("SELECT * FROM payments WHERE studId = :id");
-        query.bindValue(":id", i);
+        query.bindValue(":id", order[i]);
         query.exec();
 
         rec = query.record();
@@ -423,7 +388,7 @@ void MainWindow::on_action_open_triggered()
         }
 
         query.prepare("SELECT * FROM payments WHERE studId = :id");
-        query.bindValue(":id", i);
+        query.bindValue(":id", order[i]);
         query.exec();
 
         rec = query.record();
@@ -435,7 +400,7 @@ void MainWindow::on_action_open_triggered()
         }
 
         query.prepare("SELECT * FROM payments WHERE studId = :id");
-        query.bindValue(":id", i);
+        query.bindValue(":id", order[i]);
         query.exec();
 
         rec = query.record();
@@ -450,27 +415,28 @@ void MainWindow::on_action_open_triggered()
     }
 }
 
-void MainWindow::on_actionSort_triggered()
-{
-    /*ui->tableWidget->setSortingEnabled(true);                   //https://stackoverflow.com/questions/10079750/how-to-sort-values-in-columns-and-update-table
-    ui->tableWidget->sortByColumn(0,Qt::AscendingOrder);
-    ui->tableWidget->setSortingEnabled(false);*/
-    /*QString order = "name";
-
-    query.prepare("CREATE TABLE sub AS SELECT * FROM students ORDER BY :order");
-    query.bindValue(":order", order);
-
-    if (!query.exec()) {
-        message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
-    }
-
-    query.exec("DROP TABLE students");*/
-}
-
-
 void MainWindow::on_actionBeenden_triggered()
 {
     on_quitButton_clicked();
 }
 
+void MainWindow::on_actionName_triggered()
+{
+    sort = 1;
+    on_actionSpeichern_triggered();
+    on_action_open_triggered();
+}
 
+void MainWindow::on_actionVorname_triggered()
+{
+    sort = 2;
+    on_actionSpeichern_triggered();
+    on_action_open_triggered();
+}
+
+void MainWindow::on_actionGuthaben_triggered()
+{
+    sort = 3;
+    on_actionSpeichern_triggered();
+    on_action_open_triggered();
+}

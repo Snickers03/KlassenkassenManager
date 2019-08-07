@@ -16,6 +16,22 @@
   <property name="windowTitle">
    <string>Maturarbeit</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow {
+	background-color: rgb(220, 220, 220);
+}
+
+QPushButton {
+	border: 2px solid rgb(100, 100, 100); 
+	border-radius: 1px;
+	padding: 10px, 5px;
+}
+
+QPushButton:hover {
+	background-color: white;
+	border: 2px solid black;
+}</string>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="minimumSize">
     <size>
@@ -38,10 +54,7 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">QLabel {
-	color: grey;
-	font: 20pt &quot;MS Shell Dlg 2&quot;;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>Übersicht</string>
@@ -60,10 +73,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">QTableWidget {
-	color: rgb(0, 0, 255);
-	border-collapse: collapse;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
@@ -74,8 +84,32 @@
         <property name="gridStyle">
          <enum>Qt::SolidLine</enum>
         </property>
+        <property name="cornerButtonEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="horizontalHeaderVisible">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="horizontalHeaderCascadingSectionResizes">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>45</number>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>110</number>
+        </attribute>
+        <attribute name="horizontalHeaderHighlightSections">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+         <bool>false</bool>
+        </attribute>
         <attribute name="horizontalHeaderStretchLastSection">
          <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderVisible">
+         <bool>true</bool>
         </attribute>
         <attribute name="verticalHeaderStretchLastSection">
          <bool>false</bool>
@@ -129,6 +163,20 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
+         <widget class="QPushButton" name="clearSelectionButton">
+          <property name="text">
+           <string>Auswahl aufheben</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="chooseAllButton">
+          <property name="text">
+           <string>Alle auswählen</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -142,102 +190,21 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="chooseAllButton">
+         <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Alle auswählen</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="1">
-     <spacer name="horizontalSpacer_4">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>50</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="2">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="transactionLabel">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Transaktionen von x</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTableWidget" name="payTable">
-        <property name="minimumSize">
-         <size>
-          <width>300</width>
-          <height>0</height>
-         </size>
-        </property>
-        <row>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </row>
-        <column>
-         <property name="text">
-          <string>Datum</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Grund</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Menge</string>
-         </property>
-        </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string>1.1.2019</string>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string>Einzahlung</string>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string>500</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Momentaner Kontostand:</string>
+           <string>Total: </string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_2"/>
+         <widget class="QLineEdit" name="totalLineEdit">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -350,10 +317,7 @@
         <item>
          <widget class="QPushButton" name="quitButton">
           <property name="styleSheet">
-           <string notr="true">QPushButton:hover {
-	background-color: blue;
-	color: white;
-}</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>Beenden</string>
@@ -363,6 +327,116 @@
        </layout>
       </item>
      </layout>
+    </item>
+    <item row="0" column="2">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="transactionLabel">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Transaktionen von x</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="payTable">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <row>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>Datum</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Grund</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Menge</string>
+         </property>
+        </column>
+        <item row="0" column="0">
+         <property name="text">
+          <string>1.1.2019</string>
+         </property>
+        </item>
+        <item row="0" column="1">
+         <property name="text">
+          <string>Einzahlung</string>
+         </property>
+        </item>
+        <item row="0" column="2">
+         <property name="text">
+          <string>500</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Momentaner Kontostand:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="balanceLineEdit">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="1">
+     <spacer name="horizontalSpacer_4">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>47</width>
+        <height>577</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
@@ -388,11 +462,19 @@
     <property name="title">
      <string>Bearbeiten</string>
     </property>
+    <widget class="QMenu" name="menuSortieren">
+     <property name="title">
+      <string>Sortieren</string>
+     </property>
+     <addaction name="actionName"/>
+     <addaction name="actionVorname"/>
+     <addaction name="actionGuthaben"/>
+    </widget>
     <addaction name="addStudent"/>
     <addaction name="deleteStudent"/>
     <addaction name="separator"/>
     <addaction name="actionZahlung"/>
-    <addaction name="actionSort"/>
+    <addaction name="menuSortieren"/>
    </widget>
    <addaction name="menuDatei"/>
    <addaction name="menuBearbeiten"/>
@@ -462,14 +544,24 @@
     <string>Zahlung</string>
    </property>
   </action>
-  <action name="actionSort">
-   <property name="text">
-    <string>Sortieren</string>
-   </property>
-  </action>
   <action name="actionBeenden">
    <property name="text">
     <string>Beenden</string>
+   </property>
+  </action>
+  <action name="actionName">
+   <property name="text">
+    <string>Name</string>
+   </property>
+  </action>
+  <action name="actionVorname">
+   <property name="text">
+    <string>Vorname</string>
+   </property>
+  </action>
+  <action name="actionGuthaben">
+   <property name="text">
+    <string>Guthaben</string>
    </property>
   </action>
  </widget>
