@@ -229,8 +229,8 @@ QHeaderView::section:vertical
         </property>
         <property name="minimumSize">
          <size>
-          <width>0</width>
-          <height>0</height>
+          <width>32</width>
+          <height>72</height>
          </size>
         </property>
         <property name="styleSheet">
@@ -410,8 +410,8 @@ QHeaderView::section:vertical
        <widget class="QTableWidget" name="payTable">
         <property name="minimumSize">
          <size>
-          <width>0</width>
-          <height>0</height>
+          <width>32</width>
+          <height>72</height>
          </size>
         </property>
         <row>
@@ -529,9 +529,25 @@ QHeaderView::section:vertical
     <property name="title">
      <string>Datei</string>
     </property>
+    <widget class="QMenu" name="menuImportieren">
+     <property name="title">
+      <string>Importieren</string>
+     </property>
+     <addaction name="actionExcel"/>
+    </widget>
+    <widget class="QMenu" name="menuDrucken">
+     <property name="title">
+      <string>Drucken</string>
+     </property>
+     <addaction name="actionPrintOverview"/>
+     <addaction name="actionPrintSelected"/>
+     <addaction name="actionPrintAll"/>
+    </widget>
     <addaction name="action_open"/>
     <addaction name="actionSpeichern"/>
     <addaction name="separator"/>
+    <addaction name="menuImportieren"/>
+    <addaction name="menuDrucken"/>
     <addaction name="actionBeenden"/>
    </widget>
    <widget class="QMenu" name="menuBearbeiten">
@@ -576,6 +592,7 @@ QHeaderView::section:vertical
    <addaction name="addStudent"/>
    <addaction name="deleteStudent"/>
    <addaction name="actionZahlung"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionSpeichern">
    <property name="icon">
@@ -638,6 +655,26 @@ QHeaderView::section:vertical
   <action name="actionGuthaben">
    <property name="text">
     <string>Guthaben</string>
+   </property>
+  </action>
+  <action name="actionExcel">
+   <property name="text">
+    <string>Excel</string>
+   </property>
+  </action>
+  <action name="actionPrintOverview">
+   <property name="text">
+    <string>Übersicht</string>
+   </property>
+  </action>
+  <action name="actionPrintSelected">
+   <property name="text">
+    <string>Ausgewählter Schüler</string>
+   </property>
+  </action>
+  <action name="actionPrintAll">
+   <property name="text">
+    <string>Alle Schüler</string>
    </property>
   </action>
  </widget>

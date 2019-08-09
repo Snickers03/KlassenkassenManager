@@ -11,6 +11,9 @@
 #include <QtSql>
 #include <algorithm>
 #include <QDate>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
+#include <QPainter>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -439,4 +442,119 @@ void MainWindow::on_actionGuthaben_triggered()
     sort = 3;
     on_actionSpeichern_triggered();
     on_action_open_triggered();
+}
+
+void MainWindow::on_actionExcel_triggered()                     //https://wiki.qt.io/Handling_Microsoft_Excel_file_format
+{
+    database.close();
+    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC", "xlsx_connection");
+    db.setDatabaseName("DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=" + QString("c:\\Users\\nicsc\\Documents\\MaturS\\Other\\students.xlsx"));
+    if(db.open())
+    {
+        qDebug() << "test";
+        QSqlQuery exQuery("select * from [" + QString("Worksheet") + "$]"); // Select range, place A1:B5 after $
+        while (exQuery.next())
+        {
+            QString column1= exQuery.value(0).toString();
+            qDebug() << column1;
+        }
+    db.close();
+    QSqlDatabase::removeDatabase("xlsx_connection");
+
+    }
+    else {
+        qDebug() << "broken";
+    }
+}
+
+
+void MainWindow::on_actionPrintOverview_triggered()
+{
+    QFile::remove("students.pdf");
+
+    QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName("students.pdf");
+
+    QPainter painter(&printer);
+
+    double xscale = printer.pageRect().width() / double(ui->tableWidget->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
+    double yscale = printer.pageRect().height() / double(ui->tableWidget->height());
+    double scale = qMin(xscale, yscale);
+    painter.translate(printer.paperRect().center());
+    painter.scale(scale, scale);
+    painter.translate(-ui->tableWidget->width()/ 2, -ui->tableWidget->height()/ 2);
+    ui->tableWidget->render(&painter);
+}
+
+void MainWindow::on_actionPrintAll_triggered()      //in process
+{
+    QFile::remove("all.pdf");
+
+    QPrinter printer(QPrinter::HighResolution);             //https://doc.qt.io/qt-5/qtprintsupport-index.html
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName("all.pdf");
+
+    QPainter painter;
+    painter.begin(&printer);
+
+    double xscale = printer.pageRect().width() / double(ui->payTable->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
+    double yscale = printer.pageRect().height() / double(ui->payTable->height());
+    double scale = qMin(xscale, yscale);
+    painter.translate(printer.paperRect().center());
+    painter.scale(scale, scale);
+    painter.translate(-ui->payTable->width()/ 2, -ui->payTable->height()/ 2);
+
+    for (int page = 0; page < studAmount; page++)
+    {
+        ///////////update pay table
+        ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
+        int currentRow = 0;
+        double total = 0;           //current balance
+
+        for(int i = 0; i < stud[page].payCount; i++) {
+
+            QString date = stud[page].pay[i].getDate();
+            QString reason = stud[page].pay[i].getReason();
+            double amount = stud[page].pay[i].getAmount();
+
+            ui->payTable->insertRow(ui->payTable->rowCount());
+            currentRow = ui->payTable->rowCount() - 1;
+
+            ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
+            ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
+            ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
+            ui->payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+            total += amount;
+        }
+
+        ////////////////////////
+        ui->payTable->render(&painter);
+
+        if (page != studAmount - 1) {
+            printer.newPage();
+        }
+    }
+
+    painter.end();
+}
+
+void MainWindow::on_actionPrintSelected_triggered()
+{
+    QFile::remove("selected.pdf");
+
+    QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName("selected.pdf");
+
+    QPainter painter(&printer);
+
+    double xscale = printer.pageRect().width() / double(ui->payTable->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
+    double yscale = printer.pageRect().height() / double(ui->payTable->height());
+    double scale = qMin(xscale, yscale);
+    painter.translate(printer.paperRect().center());
+    painter.scale(scale, scale);
+    painter.translate(-ui->payTable->width()/ 2, -ui->payTable->height()/ 2);
+    ui->payTable->render(&painter);
 }

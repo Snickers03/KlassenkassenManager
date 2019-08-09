@@ -1,30 +1,11 @@
--Überblick aller Zahlungen
-	-Speichern Zahlungsgrund
-
 -Speicher- & Ladefunktion
 	(Excel)
 
 -Druckfunktion
+	-zeige Schüler an bei gedruckten Zahlungen
 
 -bessere Auswahl der Schüler
 
 -responsive
 
--Sortieren 
-
-Problem: id von row in TableWidget abhängig -> nicht gleich nach sort
-	 studId -> id muss gleich bleiben
-
-
-
-
-
-Bugs:
-	-Zahlungen automatisch gespeichert, Schüler hinzufügen/löschen nicht
-	-bei Löschen stimmen Schüler/Zahlugen nicht mehr überein
-
-
-Student object array in mainWindow, payment object array in student -> jeder student eigenes payment object array
-
-
-Schüler sortiert, Zahlungen bleiben auf gleicher Position -> stimmt nicht mehr überein 
+Bugs:	-überlappende widgets

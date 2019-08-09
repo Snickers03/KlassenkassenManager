@@ -57,6 +57,14 @@ private slots:
 
     void on_clearSelectionButton_clicked();
 
+    void on_actionExcel_triggered();
+
+    void on_actionPrintAll_triggered();
+
+    void on_actionPrintOverview_triggered();
+
+    void on_actionPrintSelected_triggered();
+
 private:
     Ui::MainWindow *ui;
     QMessageBox message;
