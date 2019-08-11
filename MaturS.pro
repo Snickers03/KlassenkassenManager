@@ -53,3 +53,5 @@ RESOURCES += \
     images.qrc
 
 DISTFILES +=
+
+include(3rdParty/qtxlsx/src/xlsx/qtxlsx.pri)

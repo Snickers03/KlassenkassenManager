@@ -14,7 +14,7 @@
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
 #include <QPainter>
-
+#include "xlsxdocument.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -444,29 +444,40 @@ void MainWindow::on_actionGuthaben_triggered()
     on_action_open_triggered();
 }
 
-void MainWindow::on_actionExcel_triggered()                     //https://wiki.qt.io/Handling_Microsoft_Excel_file_format
+void MainWindow::on_actionExcel_triggered()       //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
 {
-    database.close();
-    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC", "xlsx_connection");
-    db.setDatabaseName("DRIVER={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=" + QString("c:\\Users\\nicsc\\Documents\\MaturS\\Other\\students.xlsx"));
-    if(db.open())
-    {
-        qDebug() << "test";
-        QSqlQuery exQuery("select * from [" + QString("Worksheet") + "$]"); // Select range, place A1:B5 after $
-        while (exQuery.next())
-        {
-            QString column1= exQuery.value(0).toString();
-            qDebug() << column1;
-        }
-    db.close();
-    QSqlDatabase::removeDatabase("xlsx_connection");
+    studAmount = 0;
 
-    }
-    else {
-        qDebug() << "broken";
+    QXlsx::Document xlsx("students.xlsx");
+
+    for (int i = 0; xlsx.cellAt(i + 2, 2)->value().toString() != ""; i++)           //run until empty cell
+    {
+        stud[i].setName(xlsx.cellAt(i + 2, 2)->value().toString());
+        stud[i].setVorname(xlsx.cellAt(i + 2, 3)->value().toString());
+        studAmount++;
     }
 }
 
+void MainWindow::on_actionExcelExport_triggered()
+{
+    QXlsx::Document xlsx;       //overview
+    QXlsx::Format format;
+
+    format.setFontBold(true);
+
+    xlsx.write("A1", "Name", format);
+    xlsx.write("B1", "Vorname", format);
+    xlsx.write("C1", "Guthaben", format);
+
+    for (int i = 0; i < studAmount; i++)
+    {
+        xlsx.write(1, i + 2, stud[i].getName());
+        xlsx.write(2, i + 2, stud[i].getVorname());
+        xlsx.write(3, i + 2, stud[i].getBalance());
+    }
+
+    xlsx.saveAs("export.xlsx");
+}
 
 void MainWindow::on_actionPrintOverview_triggered()
 {
@@ -558,3 +569,5 @@ void MainWindow::on_actionPrintSelected_triggered()
     painter.translate(-ui->payTable->width()/ 2, -ui->payTable->height()/ 2);
     ui->payTable->render(&painter);
 }
+
+

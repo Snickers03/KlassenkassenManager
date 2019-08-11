@@ -249,7 +249,7 @@ QHeaderView::section:vertical
          <bool>true</bool>
         </property>
         <attribute name="horizontalHeaderVisible">
-         <bool>true</bool>
+         <bool>false</bool>
         </attribute>
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>false</bool>
@@ -270,7 +270,7 @@ QHeaderView::section:vertical
          <bool>false</bool>
         </attribute>
         <attribute name="verticalHeaderVisible">
-         <bool>true</bool>
+         <bool>false</bool>
         </attribute>
         <attribute name="verticalHeaderStretchLastSection">
          <bool>false</bool>
@@ -537,11 +537,12 @@ QHeaderView::section:vertical
     </widget>
     <widget class="QMenu" name="menuDrucken">
      <property name="title">
-      <string>Drucken</string>
+      <string>Exportieren</string>
      </property>
      <addaction name="actionPrintOverview"/>
      <addaction name="actionPrintSelected"/>
      <addaction name="actionPrintAll"/>
+     <addaction name="actionExcelExport"/>
     </widget>
     <addaction name="action_open"/>
     <addaction name="actionSpeichern"/>
@@ -675,6 +676,11 @@ QHeaderView::section:vertical
   <action name="actionPrintAll">
    <property name="text">
     <string>Alle Schüler</string>
+   </property>
+  </action>
+  <action name="actionExcelExport">
+   <property name="text">
+    <string>Excel</string>
    </property>
   </action>
  </widget>
