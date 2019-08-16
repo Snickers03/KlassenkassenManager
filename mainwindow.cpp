@@ -3,6 +3,7 @@
 #include "sure.h"
 #include "addstudent.h"
 #include "student.h"
+#include "export.h"
 #include <QFile>
 #include <QTextStream>
 #include <QItemSelectionModel>
@@ -14,6 +15,7 @@
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
 #include <QPainter>
+#include <QFileDialog>
 #include "xlsxdocument.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -25,9 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balanceSpinBox->setVisible(false);
     ui->balanceButtonBox->setVisible(false);
     ui->balanceTextEdit->setVisible(false);
-
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->payLabel->setVisible(false);
+    ui->payLabel_2->setVisible(false);
 
     databaseName = "studentDatabase.db";                                           // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
     database = QSqlDatabase::addDatabase("QSQLITE");            //create database
@@ -37,7 +38,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     on_action_open_triggered();     //auto-open existing database
 
+    ui->tableWidget->verticalHeader()->setVisible(true);
+    ui->tableWidget->horizontalHeader()->setVisible(true);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+
     ui->payTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    qDebug() << "MainW";
 }
 
 MainWindow::~MainWindow()
@@ -99,6 +107,10 @@ void MainWindow::updateTable(int row)
     ui->tableWidget->item(row, 1)->setText(stud[row].getVorname());
     ui->tableWidget->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));        //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
 
+    if (stud[row].getBalance() < 0) {
+        ui->tableWidget->item(row, 2)->setTextColor(Qt::red);
+    }
+
     double total = 0;
 
     for (int i = 0; i < studAmount; i++) {
@@ -132,6 +144,8 @@ void MainWindow::on_actionZahlung_triggered()
     ui->balanceSpinBox->setVisible(true);
     ui->balanceButtonBox->setVisible(true);
     ui->balanceTextEdit->setVisible(true);
+    ui->payLabel->setVisible(true);
+    ui->payLabel_2->setVisible(true);
 }
 
 void MainWindow::on_balanceButtonBox_accepted()
@@ -182,6 +196,8 @@ void MainWindow::on_balanceButtonBox_accepted()
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
     ui->balanceButtonBox->setVisible(false);
     ui->balanceTextEdit->setVisible(false);
+    ui->payLabel->setVisible(false);
+    ui->payLabel_2->setVisible(false);
 }
 
 void MainWindow::on_balanceButtonBox_rejected()
@@ -189,8 +205,25 @@ void MainWindow::on_balanceButtonBox_rejected()
     ui->balanceSpinBox->setVisible(false);   //hide payment elements
     ui->balanceButtonBox->setVisible(false);
     ui->balanceTextEdit->setVisible(false);
+    ui->payLabel->setVisible(false);
+    ui->payLabel_2->setVisible(false);
 }
 
+void MainWindow::on_tableWidget_cellClicked(int row, int col)       //1 field selected == whole row selected
+{
+    bool rowSelected = !ui->tableWidget->item(row, col)->isSelected();
+
+    if (rowSelected)
+    {
+        ui->tableWidget->item(row, 0)->setSelected(false);
+        ui->tableWidget->item(row, 1)->setSelected(false);
+        ui->tableWidget->item(row, 2)->setSelected(false);
+    }
+    else if (!rowSelected)
+    {
+        ui->tableWidget->selectRow(row);
+    }
+}
 
 void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 {
@@ -446,128 +479,63 @@ void MainWindow::on_actionGuthaben_triggered()
 
 void MainWindow::on_actionExcel_triggered()       //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
 {
+    QString filename = QFileDialog::getOpenFileName(this, "Importiere Excel-Datei", "C://", "Excel Dateien (*.xlsx) ;; Alle Dateien (*.*)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
+
+    if (filename == "") {                                                       //cancel if no file selected
+        return;
+    }
+
+    ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
     studAmount = 0;
 
-    QXlsx::Document xlsx("students.xlsx");
+    QXlsx::Document xlsx(filename);
 
     for (int i = 0; xlsx.cellAt(i + 2, 2)->value().toString() != ""; i++)           //run until empty cell
     {
         stud[i].setName(xlsx.cellAt(i + 2, 2)->value().toString());
         stud[i].setVorname(xlsx.cellAt(i + 2, 3)->value().toString());
-        studAmount++;
+        addCell();
     }
 }
 
 void MainWindow::on_actionExcelExport_triggered()
 {
-    QXlsx::Document xlsx;       //overview
-    QXlsx::Format format;
+    Export exp(this, 1);
+    bool res;
+    exp.setWindowTitle("Als Excel Datei exportieren");
+    res = exp.exec();
 
-    format.setFontBold(true);
-
-    xlsx.write("A1", "Name", format);
-    xlsx.write("B1", "Vorname", format);
-    xlsx.write("C1", "Guthaben", format);
-
-    for (int i = 0; i < studAmount; i++)
-    {
-        xlsx.write(1, i + 2, stud[i].getName());
-        xlsx.write(2, i + 2, stud[i].getVorname());
-        xlsx.write(3, i + 2, stud[i].getBalance());
+    if (res == false) {
+        return;
     }
 
-    xlsx.saveAs("export.xlsx");
+    switch (exp.choice) {
+    case 0: return;
+    case 1: exp.excelOverView(stud, studAmount);
+        break;
+    case 2: exp.excelAll(stud, studAmount);
+        break;
+    case 3: exp.excelSelected(stud, selectedStudent);
+    }
 }
 
-void MainWindow::on_actionPrintOverview_triggered()
+void MainWindow::on_actionPDF_triggered()
 {
-    QFile::remove("students.pdf");
+    Export exp(this, 2);
+    bool res;
+    exp.setWindowTitle("Als PDF exportieren");
+    res = exp.exec();
 
-    QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName("students.pdf");
-
-    QPainter painter(&printer);
-
-    double xscale = printer.pageRect().width() / double(ui->tableWidget->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(ui->tableWidget->height());
-    double scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().center());
-    painter.scale(scale, scale);
-    painter.translate(-ui->tableWidget->width()/ 2, -ui->tableWidget->height()/ 2);
-    ui->tableWidget->render(&painter);
-}
-
-void MainWindow::on_actionPrintAll_triggered()      //in process
-{
-    QFile::remove("all.pdf");
-
-    QPrinter printer(QPrinter::HighResolution);             //https://doc.qt.io/qt-5/qtprintsupport-index.html
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName("all.pdf");
-
-    QPainter painter;
-    painter.begin(&printer);
-
-    double xscale = printer.pageRect().width() / double(ui->payTable->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(ui->payTable->height());
-    double scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().center());
-    painter.scale(scale, scale);
-    painter.translate(-ui->payTable->width()/ 2, -ui->payTable->height()/ 2);
-
-    for (int page = 0; page < studAmount; page++)
-    {
-        ///////////update pay table
-        ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
-        int currentRow = 0;
-        double total = 0;           //current balance
-
-        for(int i = 0; i < stud[page].payCount; i++) {
-
-            QString date = stud[page].pay[i].getDate();
-            QString reason = stud[page].pay[i].getReason();
-            double amount = stud[page].pay[i].getAmount();
-
-            ui->payTable->insertRow(ui->payTable->rowCount());
-            currentRow = ui->payTable->rowCount() - 1;
-
-            ui->payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
-            ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
-            ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
-            ui->payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-
-            total += amount;
-        }
-
-        ////////////////////////
-        ui->payTable->render(&painter);
-
-        if (page != studAmount - 1) {
-            printer.newPage();
-        }
+    if (res == false) {
+        return;
     }
 
-    painter.end();
+    switch (exp.choice) {
+    case 0: return;
+    case 4: exp.pdfOverView(ui->tableWidget);
+        break;
+    case 5: exp.pdfAll(ui->payTable, stud, studAmount);
+        break;
+    case 6: exp.pdfSelected(ui->payTable, stud, selectedStudent);
+    }
 }
-
-void MainWindow::on_actionPrintSelected_triggered()
-{
-    QFile::remove("selected.pdf");
-
-    QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName("selected.pdf");
-
-    QPainter painter(&printer);
-
-    double xscale = printer.pageRect().width() / double(ui->payTable->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(ui->payTable->height());
-    double scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().center());
-    painter.scale(scale, scale);
-    painter.translate(-ui->payTable->width()/ 2, -ui->payTable->height()/ 2);
-    ui->payTable->render(&painter);
-}
-
-

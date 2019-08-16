@@ -25,6 +25,16 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role);
 
+    void pdfOverView(QString filename);
+    void pdfAll(QString filename);
+    void pdfSelected(QString filename);
+
+    void excelOverView(QString filename);
+    void excelAll(QString filename);
+    void excelSelected(QString filename);
+
+    Student stud[50];
+
 private slots:
 
     void on_quitButton_clicked();
@@ -43,9 +53,10 @@ private slots:
     void on_actionGuthaben_triggered();
     void on_clearSelectionButton_clicked();
     void on_actionExcel_triggered();
-    void on_actionPrintAll_triggered();
-    void on_actionPrintOverview_triggered();
-    void on_actionPrintSelected_triggered();
+
+    void on_tableWidget_cellClicked(int row, int column);
+
+    void on_actionPDF_triggered();
 
     void on_actionExcelExport_triggered();
 
@@ -53,7 +64,6 @@ private:
     Ui::MainWindow *ui;
     QMessageBox message;
 
-    Student stud[50];
     int studAmount = 1;
     bool saved = false;
     int selectedStudent;    //payments of selected student shown

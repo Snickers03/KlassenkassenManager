@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    export.cpp \
         main.cpp \
         mainwindow.cpp \
     payments.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     student.cpp
 
 HEADERS += \
+    export.h \
         mainwindow.h \
     payments.h \
     sure.h \
@@ -40,6 +42,7 @@ HEADERS += \
     student.h
 
 FORMS += \
+    export.ui \
         mainwindow.ui \
     sure.ui \
     addstudent.ui

@@ -8,4 +8,7 @@
 
 -responsive
 
+-Bearbeitungsmodus
+
 Bugs:	-überlappende widgets
+	-export callt mainwindow constructor -> 2. Sql Connection
