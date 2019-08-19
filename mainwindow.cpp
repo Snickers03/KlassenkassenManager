@@ -44,8 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 
     ui->payTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    qDebug() << "MainW";
 }
 
 MainWindow::~MainWindow()
@@ -480,9 +478,19 @@ void MainWindow::on_actionGuthaben_triggered()
 void MainWindow::on_actionExcel_triggered()       //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
 {
     QString filename = QFileDialog::getOpenFileName(this, "Importiere Excel-Datei", "C://", "Excel Dateien (*.xlsx) ;; Alle Dateien (*.*)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
+    qDebug() << filename;               //crashes sometimes, changing font fixes it for some f reason
 
-    if (filename == "") {                                                       //cancel if no file selected
+    if (filename == "") {                                                   //cancel if no file selected
         return;
+    }
+
+    int nameHeader[2] = {0, 0};
+    int vornameHeader[2] = {0, 0};
+    int balanceHeader[2] = {0, 0};
+
+    for (int i = 0; i < studAmount; i++)
+    {
+        stud[i].payCount = 0;
     }
 
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
@@ -490,10 +498,45 @@ void MainWindow::on_actionExcel_triggered()       //import               //https
 
     QXlsx::Document xlsx(filename);
 
-    for (int i = 0; xlsx.cellAt(i + 2, 2)->value().toString() != ""; i++)           //run until empty cell
+    for (int i = 1; i < 7; i++)
     {
-        stud[i].setName(xlsx.cellAt(i + 2, 2)->value().toString());
-        stud[i].setVorname(xlsx.cellAt(i + 2, 3)->value().toString());
+        for (int j = 1; j < 7; j++)
+        {
+           if (xlsx.cellAt(i, j)->value().toString() == "Name" || xlsx.cellAt(i, j)->value().toString() == "Nachname") {    //get starting cell
+               nameHeader[0] = i;
+               nameHeader[1] = j;
+           }
+           if (xlsx.cellAt(i, j)->value().toString() == "Vorname") {
+               vornameHeader[0] = i;
+               vornameHeader[1] = j;
+           }
+           if (xlsx.cellAt(i, j) ->value().toString() == "Guthaben") {
+               balanceHeader[0] = i;
+               balanceHeader[1] = j;
+           }
+
+        }
+    }
+
+    if (nameHeader[0] == 0 || vornameHeader[0] == 0) {
+        message.critical(this, "Error", "Namen und Vornamen Spalten nicht gefunden; "
+                                        "Die Spalten müssen mit 'Name' und 'Vorname' beschriftet sein und sich in der oberen linken Ecke der Excel-Datei befinden. Optional: Die Spalte mit dem Kontostand muss mit 'Guthaben' beschriftet sein.");
+        return;
+    }
+
+    for (int i = 0; xlsx.cellAt(i + nameHeader[0] + 1, nameHeader[1])->value().toString() != ""; i++)           //run until empty cell
+    {
+        stud[i].setName(xlsx.cellAt(i + nameHeader[0] + 1, nameHeader[1])->value().toString());
+        stud[i].setVorname(xlsx.cellAt(i + vornameHeader[0] + 1, vornameHeader[1])->value().toString());
+
+        if (balanceHeader[0] != 0)                          //nested to avoid mistaking total value for balance of student
+        {
+            stud[i].setBalance(xlsx.cellAt(i + balanceHeader[0] + 1, balanceHeader[1])->value().toDouble());
+        }
+        else {
+            stud[i].setBalance(0);
+        }
+
         addCell();
     }
 }

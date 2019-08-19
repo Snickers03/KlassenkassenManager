@@ -1,14 +1,10 @@
 -Speicher- & Ladefunktion
-	(Excel)
+	(Excel)	
+			Total anzeigen in export
+			-range selection
 
--Druckfunktion
-	-zeige Schüler an bei gedruckten Zahlungen
-
--bessere Auswahl der Schüler
-
--responsive
+-zeige Schüler an bei gedruckten Zahlungen
 
 -Bearbeitungsmodus
 
-Bugs:	-überlappende widgets
-	-export callt mainwindow constructor -> 2. Sql Connection
+Bugs: -manchmal absturz bei excel import 
