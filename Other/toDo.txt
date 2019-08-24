@@ -1,10 +1,13 @@
 -Speicher- & Ladefunktion
 	(Excel)	
-			Total anzeigen in export
 			-range selection
 
 -zeige Schüler an bei gedruckten Zahlungen
 
--Bearbeitungsmodus
+---Bearbeitungsmodus
 
 Bugs: -manchmal absturz bei excel import 
+	-edits von zahlungen werden bei schülerwechsel nicht gespeichert
+
+?: Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler
+

@@ -21,7 +21,7 @@ public:
     void pdfAll(QTableWidget *payTable, Student stud[], int studAmount);
     void pdfSelected(QTableWidget *payTable, Student stud[], int selectedStudent);
 
-    void excelOverView(Student stud[], int studAmount);
+    void excelOverView(Student stud[], int studAmount, double total);
     void excelAll(Student stud[], int studAmount);
     void excelSelected(Student stud[], int selectedStudent);
 

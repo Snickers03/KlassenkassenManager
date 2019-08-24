@@ -157,7 +157,7 @@ void Export::pdfSelected(QTableWidget *payTable, Student stud[], int selectedStu
     payTable->render(&painter);
 }
 
-void Export::excelOverView(Student stud[], int studAmount)
+void Export::excelOverView(Student stud[], int studAmount, double total)
 {
     QXlsx::Document xlsx;       //overview
     QXlsx::Format format;
@@ -174,6 +174,9 @@ void Export::excelOverView(Student stud[], int studAmount)
         xlsx.write(i + 2, 3, stud[i].getBalance());
     }
 
+    xlsx.write(studAmount + 3, 2, "Total:", format);
+    xlsx.write(studAmount + 3, 3, total, format);
+
     xlsx.saveAs(filename + ".xlsx");
 }
 
@@ -186,7 +189,6 @@ void Export::excelAll(Student stud[], int studAmount)
     for (int i = 0; i < studAmount; i++)
     {
         xlsx.addSheet(stud[i].getName());
-        //xlsx.addSheet();
 
         xlsx.write("A1", "Zahlungen von", format);
         xlsx.write("B1", stud[i].getName(), format);
@@ -201,6 +203,9 @@ void Export::excelAll(Student stud[], int studAmount)
             xlsx.write(j + 4, 2, stud[i].pay[j].getReason());
             xlsx.write(j + 4, 3, stud[i].pay[j].getAmount());
         }
+
+        xlsx.write(stud[i].payCount + 5, 2, "Total:", format);
+        xlsx.write(stud[i].payCount + 5, 3, stud[i].getBalance(), format);
     }
 
     xlsx.saveAs(filename + ".xlsx");
@@ -227,6 +232,9 @@ void Export::excelSelected(Student stud[], int sel)
         xlsx.write(i + 4, 2, stud[sel].pay[i].getReason());
         xlsx.write(i + 4, 3, stud[sel].pay[i].getAmount());
     }
+
+    xlsx.write(stud[sel].payCount + 5, 2, "Total:", format);
+    xlsx.write(stud[sel].payCount + 5, 3, stud[sel].getBalance(), format);
 
     xlsx.saveAs(filename + ".xlsx");
 }

@@ -15,11 +15,18 @@ Sure::~Sure()
 
 void Sure::on_quitYes_clicked()
 {
+    choice = 1;
     accept();
 }
 
 void Sure::on_quitNo_clicked()
 {
-    reject();
+    choice = 2;
+    accept();
 }
 
+void Sure::on_cancelPushButton_clicked()
+{
+    choice = 3;
+    accept();
+}

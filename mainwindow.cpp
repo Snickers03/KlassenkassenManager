@@ -30,6 +30,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->payLabel->setVisible(false);
     ui->payLabel_2->setVisible(false);
 
+    ui->editLabel->setVisible(false);
+    ui->editSaveButton->setVisible(false);
+
     databaseName = "studentDatabase.db";                                           // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
     database = QSqlDatabase::addDatabase("QSQLITE");            //create database
     database.setDatabaseName(databaseName);
@@ -51,10 +54,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_quitButton_clicked()
+void MainWindow::closeEvent(QCloseEvent *event)             //https://stackoverflow.com/questions/17480984/qt-how-do-i-handle-the-event-of-the-user-pressing-the-x-close-button
 {
     if (saved == true) {
-        close();
+        event->accept();
     }
     else {
         Sure su(this);
@@ -62,14 +65,32 @@ void MainWindow::on_quitButton_clicked()
         su.setWindowTitle("Schliessen");
         res = su.exec();
 
-        if(res == true) {
-            on_actionSpeichern_triggered();
-            close();
+        if(res == false) {
+            event->ignore();
+            return;
         }
-        else {
-            close();
+
+        switch (su.choice) {
+        case 0: return;
+        case 1: on_actionSpeichern_triggered();
+                event->accept();
+            break;
+        case 2: event->accept();
+            break;
+        case 3: event->ignore();
+            return;
         }
     }
+}
+
+void MainWindow::on_quitButton_clicked()
+{
+    close();        //calls closeEvent
+}
+
+void MainWindow::on_actionBeenden_triggered()
+{
+    close();
 }
 
 void MainWindow::on_addStudent_triggered()
@@ -80,7 +101,7 @@ void MainWindow::on_addStudent_triggered()
     QString name, vorname;
 
     bool res;
-    res = addStud.exec();
+    res = addStud.exec();       //opens addStudent dialog
     if (res == false)
             return;
 
@@ -109,12 +130,14 @@ void MainWindow::updateTable(int row)
         ui->tableWidget->item(row, 2)->setTextColor(Qt::red);
     }
 
-    double total = 0;
+    total = 0;
 
     for (int i = 0; i < studAmount; i++) {
         total += stud[i].getBalance();
     }
     ui->totalLineEdit->setText(QString::number(total, 'f', 2));
+
+    saved = false;
 }
 
 void MainWindow::addCell()
@@ -128,13 +151,14 @@ void MainWindow::addCell()
     ui->tableWidget->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
     studAmount++;
-
-    double total = 0;
+    total = 0;
 
     for (int i = 0; i < studAmount; i++) {
         total += stud[i].getBalance();
     }
     ui->totalLineEdit->setText(QString::number(total, 'f', 2));
+
+    saved = false;
 }
 
 void MainWindow::on_actionZahlung_triggered()
@@ -177,10 +201,6 @@ void MainWindow::on_balanceButtonBox_accepted()
             stud[row].payCount++;
             stud[row].changed = true;
             updateTable(row);
-
-            if (!query.exec()) {
-                message.critical(this, "Error", "yeet query");
-            }
         }
     }
 
@@ -196,6 +216,7 @@ void MainWindow::on_balanceButtonBox_accepted()
     ui->balanceTextEdit->setVisible(false);
     ui->payLabel->setVisible(false);
     ui->payLabel_2->setVisible(false);
+    saved = false;
 }
 
 void MainWindow::on_balanceButtonBox_rejected()
@@ -231,7 +252,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 
     ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
     int currentRow = 0;
-    double total = 0;           //current balance
+    studTotal = 0;           //current balance
 
     for(int i = 0; i < stud[row].payCount; i++) {
 
@@ -247,10 +268,10 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
         ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
         ui->payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
-        total += amount;
+        studTotal += amount;
     }
 
-    ui->balanceLineEdit->setText(QString::number(total, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
+    ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
     ui->tableWidget->clearSelection();
 }
 
@@ -294,6 +315,7 @@ void MainWindow::on_deleteStudent_triggered()
     else {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");
     }
+    saved = false;
 }
 
 
@@ -449,11 +471,6 @@ void MainWindow::on_action_open_triggered()
     }
 }
 
-void MainWindow::on_actionBeenden_triggered()
-{
-    on_quitButton_clicked();
-}
-
 void MainWindow::on_actionName_triggered()
 {
     sort = 1;
@@ -478,7 +495,7 @@ void MainWindow::on_actionGuthaben_triggered()
 void MainWindow::on_actionExcel_triggered()       //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
 {
     QString filename = QFileDialog::getOpenFileName(this, "Importiere Excel-Datei", "C://", "Excel Dateien (*.xlsx) ;; Alle Dateien (*.*)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
-    qDebug() << filename;               //crashes sometimes, changing font fixes it for some f reason
+    //qDebug() << filename;               //crashes sometimes, changing font fixes it for some f reason
 
     if (filename == "") {                                                   //cancel if no file selected
         return;
@@ -514,13 +531,13 @@ void MainWindow::on_actionExcel_triggered()       //import               //https
                balanceHeader[0] = i;
                balanceHeader[1] = j;
            }
-
         }
     }
 
     if (nameHeader[0] == 0 || vornameHeader[0] == 0) {
         message.critical(this, "Error", "Namen und Vornamen Spalten nicht gefunden; "
-                                        "Die Spalten müssen mit 'Name' und 'Vorname' beschriftet sein und sich in der oberen linken Ecke der Excel-Datei befinden. Optional: Die Spalte mit dem Kontostand muss mit 'Guthaben' beschriftet sein.");
+                                        "Die Spalten müssen mit 'Name' und 'Vorname' beschriftet sein und sich in der oberen linken Ecke der Excel-Datei befinden. "
+                                        "Optional: Die Spalte mit dem Kontostand muss mit 'Guthaben' beschriftet sein.");
         return;
     }
 
@@ -531,7 +548,14 @@ void MainWindow::on_actionExcel_triggered()       //import               //https
 
         if (balanceHeader[0] != 0)                          //nested to avoid mistaking total value for balance of student
         {
+            QDate currentDate = QDate::currentDate();                   //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
+            QString date = currentDate.toString("dd.MM.yy");
+
             stud[i].setBalance(xlsx.cellAt(i + balanceHeader[0] + 1, balanceHeader[1])->value().toDouble());
+            stud[i].payCount = 1;
+            stud[i].pay[0].setDate(date);
+            stud[i].pay[0].setReason("Anfangsbestand");
+            stud[i].pay[0].setAmount(stud[i].getBalance());
         }
         else {
             stud[i].setBalance(0);
@@ -554,7 +578,7 @@ void MainWindow::on_actionExcelExport_triggered()
 
     switch (exp.choice) {
     case 0: return;
-    case 1: exp.excelOverView(stud, studAmount);
+    case 1: exp.excelOverView(stud, studAmount, total);
         break;
     case 2: exp.excelAll(stud, studAmount);
         break;
@@ -581,4 +605,55 @@ void MainWindow::on_actionPDF_triggered()
         break;
     case 6: exp.pdfSelected(ui->payTable, stud, selectedStudent);
     }
+}
+
+void MainWindow::on_actionEditMode_triggered()
+{
+    ui->tableWidget->setEditTriggers(QAbstractItemView::DoubleClicked);
+    ui->payTable->setEditTriggers(QAbstractItemView::DoubleClicked);
+
+    for (int i = 0; i < studAmount; i++) {                                                      //disable balance editing -> edit payments
+        ui->tableWidget->item(i, 2)->setFlags(ui->tableWidget->item(i, 2)->flags() & ~Qt::ItemIsEditable);             //https://www.qtcentre.org/threads/26689-QTableWidget-one-column-editable
+    }
+
+    ui->editLabel->setVisible(true);
+    ui->editSaveButton->setVisible(true);
+}
+
+void MainWindow::on_editSaveButton_clicked()
+{
+    studTotal = 0;
+
+    for (int i = 0; i < ui->payTable->rowCount(); i++)
+    {
+        stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
+        stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
+
+        double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();        //pre: 500, post 800
+        stud[selectedStudent].changeBalance(dif);
+
+        //qDebug() << dif;
+
+        stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());       
+        studTotal += stud[selectedStudent].pay[i].getAmount();
+    }
+
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++)
+    {
+        stud[i].setName(ui->tableWidget->item(i, 0)->text());               //watch out for sort bugs
+        stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
+        updateTable(i);
+    }
+
+    ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));
+
+    Q_ASSERT(stud[selectedStudent].getBalance() == studTotal);          //bug detection
+    //qDebug() << "Studtotal: " << studTotal;
+    //qDebug() << "balance: " << stud[selectedStudent].getBalance();
+
+    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->payTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    ui->editLabel->setVisible(false);
+    ui->editSaveButton->setVisible(false);
 }

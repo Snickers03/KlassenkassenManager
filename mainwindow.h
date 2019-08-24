@@ -19,6 +19,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void closeEvent(QCloseEvent *event);
+
     void updateTable(int row);
 
     void addCell();
@@ -60,6 +62,10 @@ private slots:
 
     void on_actionExcelExport_triggered();
 
+    void on_actionEditMode_triggered();
+
+    void on_editSaveButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QMessageBox message;
@@ -68,6 +74,8 @@ private:
     bool saved = false;
     int selectedStudent;    //payments of selected student shown
     int sort = 1;           //1 = order by name, 2= vorname, 3 = balance
+    double total;
+    double studTotal;
 
     QString databaseName;
     QSqlDatabase database;

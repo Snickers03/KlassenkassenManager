@@ -79,6 +79,9 @@ QLabel {
 	color: #05A334;
 }</string>
   </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="minimumSize">
     <size>
@@ -298,7 +301,7 @@ QLabel {
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>0</height>
+        <height>20</height>
        </size>
       </property>
      </spacer>
@@ -336,6 +339,9 @@ QLabel {
         </property>
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="cornerButtonEnabled">
+         <bool>true</bool>
         </property>
         <row>
          <property name="text">
@@ -463,6 +469,31 @@ QLabel {
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="editLabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Bearbeitungsmodus</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="editSaveButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Bearbeitung beenden</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="payLabel">
@@ -640,6 +671,7 @@ QLabel {
     </widget>
     <addaction name="addStudent"/>
     <addaction name="deleteStudent"/>
+    <addaction name="actionEditMode"/>
     <addaction name="separator"/>
     <addaction name="actionZahlung"/>
     <addaction name="menuSortieren"/>
@@ -761,6 +793,11 @@ QLabel {
   <action name="actionPDF">
    <property name="text">
     <string>PDF</string>
+   </property>
+  </action>
+  <action name="actionEditMode">
+   <property name="text">
+    <string>Bearbeitungsmodus</string>
    </property>
   </action>
  </widget>
