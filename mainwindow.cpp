@@ -10,7 +10,6 @@
 #include <QModelIndexList>
 #include <QMessageBox>
 #include <QtSql>
-#include <algorithm>
 #include <QDate>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
@@ -29,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->balanceTextEdit->setVisible(false);
     ui->payLabel->setVisible(false);
     ui->payLabel_2->setVisible(false);
+    ui->minusToolButton->setVisible(false);
+    ui->plusToolButton->setVisible(false);
 
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
@@ -168,13 +169,27 @@ void MainWindow::on_actionZahlung_triggered()
     ui->balanceTextEdit->setVisible(true);
     ui->payLabel->setVisible(true);
     ui->payLabel_2->setVisible(true);
+    ui->minusToolButton->setVisible(true);
+    ui->plusToolButton->setVisible(true);
 }
 
 void MainWindow::on_balanceButtonBox_accepted()
 {
     int row;
-    double amount = ui->balanceSpinBox->value();
+    double amount;
     QString reason = ui->balanceTextEdit->toPlainText();
+
+    if (ui->plusToolButton->isChecked()) {
+        amount = ui->balanceSpinBox->value();
+    }
+    else if (ui->minusToolButton->isEnabled()) {
+        amount = -ui->balanceSpinBox->value();
+    }
+    else {
+        message.critical(this, "Error", "how?");
+        on_balanceButtonBox_rejected();
+        return;
+    }
 
     QDate currentDate = QDate::currentDate();           //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
     QString date = currentDate.toString("dd.MM.yy");
@@ -216,6 +231,9 @@ void MainWindow::on_balanceButtonBox_accepted()
     ui->balanceTextEdit->setVisible(false);
     ui->payLabel->setVisible(false);
     ui->payLabel_2->setVisible(false);
+    ui->minusToolButton->setVisible(false);
+    ui->plusToolButton->setVisible(false);
+
     saved = false;
 }
 
@@ -226,6 +244,8 @@ void MainWindow::on_balanceButtonBox_rejected()
     ui->balanceTextEdit->setVisible(false);
     ui->payLabel->setVisible(false);
     ui->payLabel_2->setVisible(false);
+    ui->minusToolButton->setVisible(false);
+    ui->plusToolButton->setVisible(false);
 }
 
 void MainWindow::on_tableWidget_cellClicked(int row, int col)       //1 field selected == whole row selected

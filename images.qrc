@@ -5,6 +5,8 @@
         <file>images/icons8-cancel-96.png</file>
         <file>images/icons8-stack-of-money-filled-96.png</file>
         <file>images/icons8-print-96.png</file>
+        <file>images/icons8-minus-96.png</file>
+        <file>images/icons8-plus-96.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
