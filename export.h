@@ -25,7 +25,7 @@ public:
     void excelAll(Student stud[], int studAmount);
     void excelSelected(Student stud[], int selectedStudent);
 
-    int mode;
+    int mode;       //1: excel, 2: pdf
     int choice;
 private slots:
     void on_buttonBox_accepted();

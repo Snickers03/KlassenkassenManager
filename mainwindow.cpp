@@ -23,14 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->balanceSpinBox->setVisible(false);
-    ui->balanceButtonBox->setVisible(false);
-    ui->balanceTextEdit->setVisible(false);
-    ui->payLabel->setVisible(false);
-    ui->payLabel_2->setVisible(false);
-    ui->minusToolButton->setVisible(false);
-    ui->plusToolButton->setVisible(false);
-
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
 
@@ -162,17 +154,6 @@ void MainWindow::addCell()
     saved = false;
 }
 
-void MainWindow::on_actionZahlung_triggered()
-{
-    ui->balanceSpinBox->setVisible(true);
-    ui->balanceButtonBox->setVisible(true);
-    ui->balanceTextEdit->setVisible(true);
-    ui->payLabel->setVisible(true);
-    ui->payLabel_2->setVisible(true);
-    ui->minusToolButton->setVisible(true);
-    ui->plusToolButton->setVisible(true);
-}
-
 void MainWindow::on_balanceButtonBox_accepted()
 {
     int row;
@@ -224,28 +205,15 @@ void MainWindow::on_balanceButtonBox_accepted()
     }
 
     ui->balanceSpinBox->setValue(0);
-    ui->balanceTextEdit->setText("");
-
-    ui->balanceSpinBox->setVisible(false);   //hide payment elements
-    ui->balanceButtonBox->setVisible(false);
-    ui->balanceTextEdit->setVisible(false);
-    ui->payLabel->setVisible(false);
-    ui->payLabel_2->setVisible(false);
-    ui->minusToolButton->setVisible(false);
-    ui->plusToolButton->setVisible(false);
+    ui->balanceTextEdit->clear();
 
     saved = false;
 }
 
 void MainWindow::on_balanceButtonBox_rejected()
 {
-    ui->balanceSpinBox->setVisible(false);   //hide payment elements
-    ui->balanceButtonBox->setVisible(false);
-    ui->balanceTextEdit->setVisible(false);
-    ui->payLabel->setVisible(false);
-    ui->payLabel_2->setVisible(false);
-    ui->minusToolButton->setVisible(false);
-    ui->plusToolButton->setVisible(false);
+    ui->balanceSpinBox->setValue(0);
+    ui->balanceTextEdit->clear();
 }
 
 void MainWindow::on_tableWidget_cellClicked(int row, int col)       //1 field selected == whole row selected
@@ -290,6 +258,8 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
 
         studTotal += amount;
     }
+
+    ui->payTable->resizeRowsToContents();      //makes cell bigger id doesnt fit      https://stackoverflow.com/questions/9544122/how-to-word-wrap-text-in-the-rows-and-columns-of-a-qtablewidget
 
     ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
     ui->tableWidget->clearSelection();
@@ -378,7 +348,6 @@ void MainWindow::on_actionSpeichern_triggered()
             }
         }
     }
-
     saved = true;
 }
 
@@ -651,8 +620,6 @@ void MainWindow::on_editSaveButton_clicked()
 
         double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();        //pre: 500, post 800
         stud[selectedStudent].changeBalance(dif);
-
-        //qDebug() << dif;
 
         stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());       
         studTotal += stud[selectedStudent].pay[i].getAmount();

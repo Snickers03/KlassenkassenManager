@@ -45,7 +45,6 @@ private slots:
     void on_chooseAllButton_clicked();
     void on_addStudent_triggered();
     void on_deleteStudent_triggered();
-    void on_actionZahlung_triggered();
     void on_actionSpeichern_triggered();
     void on_balanceButtonBox_rejected();
     void on_actionBeenden_triggered();

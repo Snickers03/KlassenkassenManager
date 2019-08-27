@@ -483,32 +483,10 @@ QLabel {
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="editLabel">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>16</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Bearbeitungsmodus</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="editSaveButton">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Bearbeitung beenden</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="payLabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="font">
          <font>
           <family>MS Shell Dlg 2</family>
@@ -648,6 +626,12 @@ QLabel {
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>32</width>
@@ -672,6 +656,37 @@ QLabel {
         </property>
         <property name="centerButtons">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="editLabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Bearbeitungsmodus</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="editSaveButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Bearbeitung beenden</string>
         </property>
        </widget>
       </item>
@@ -768,7 +783,6 @@ QLabel {
     <addaction name="deleteStudent"/>
     <addaction name="actionEditMode"/>
     <addaction name="separator"/>
-    <addaction name="actionZahlung"/>
     <addaction name="menuSortieren"/>
    </widget>
    <addaction name="menuDatei"/>
@@ -794,7 +808,6 @@ QLabel {
    <addaction name="separator"/>
    <addaction name="addStudent"/>
    <addaction name="deleteStudent"/>
-   <addaction name="actionZahlung"/>
    <addaction name="separator"/>
   </widget>
   <action name="actionSpeichern">
@@ -828,16 +841,6 @@ QLabel {
    </property>
    <property name="text">
     <string>Löschen</string>
-   </property>
-  </action>
-  <action name="actionZahlung">
-   <property name="icon">
-    <iconset>
-     <normalon>:/images/images/icons8-stack-of-money-filled-96.png</normalon>
-    </iconset>
-   </property>
-   <property name="text">
-    <string>Zahlung</string>
    </property>
   </action>
   <action name="actionBeenden">

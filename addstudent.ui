@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>511</width>
-    <height>130</height>
+    <height>142</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,6 +28,11 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Name:</string>
            </property>
@@ -35,6 +40,11 @@
          </item>
          <item>
           <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Vorname:</string>
            </property>
@@ -42,6 +52,11 @@
          </item>
          <item>
           <widget class="QLabel" name="label_3">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Guthaben:</string>
            </property>
@@ -53,6 +68,11 @@
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QLineEdit" name="lineEdit">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -60,6 +80,11 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEdit_2">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -67,6 +92,11 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="doubleSpinBox">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
            <property name="minimum">
             <double>-100000000000.000000000000000</double>
            </property>

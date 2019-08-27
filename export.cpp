@@ -4,6 +4,8 @@
 #include <QFileDialog>
 #include <QPrinter>
 #include <QPainter>
+#include <QTextDocument>
+#include <QPrintDialog>
 #include "xlsxdocument.h"
 
 Export::Export(QWidget *parent, int mode) :
@@ -12,6 +14,10 @@ Export::Export(QWidget *parent, int mode) :
 {
     ui->setupUi(this);
     this->mode = mode;
+
+    if (mode == 1) {
+        ui->warnLabel->setVisible(false);
+    }
 }
 
 Export::~Export()
@@ -59,29 +65,33 @@ void Export::on_buttonBox_accepted()
     }
 }
 
-void Export::pdfOverView(QTableWidget *tableWidget)
+void Export::pdfOverView(QTableWidget *tableWidget)     //somewhat fixed
 {
-    //QFile::remove("students.pdf");
-
     QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
 
     QPainter painter(&printer);
 
-    double xscale = printer.pageRect().width() / double(tableWidget->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
+    QPoint p;
+    p.setX(5);
+    p.setY(-3);
+
+    double xscale = printer.pageRect().width() / double(tableWidget->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
     double yscale = printer.pageRect().height() / double(tableWidget->height());
     double scale = qMin(xscale, yscale);
     painter.translate(printer.paperRect().center());
     painter.scale(scale, scale);
-    painter.translate(-tableWidget->width()/ 2, -tableWidget->height()/ 2);
+    painter.translate(-tableWidget->width()/ 2, -tableWidget->height()/ 2 + 20);
     tableWidget->render(&painter);
+
+    //painter.restore();
+    painter.setFont(QFont("Arial", 1));
+    painter.drawText(p, "Übersicht");
 }
 
 void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
 {
-    //QFile::remove("all.pdf");
-
     QPrinter printer(QPrinter::HighResolution);             //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
@@ -89,13 +99,18 @@ void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
     QPainter painter;
     painter.begin(&printer);
 
-    //painter.setFont(QFont("Arial", 20));
-    double xscale = printer.pageRect().width() / double(payTable->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(payTable->height());
+    QPoint p;
+    p.setX(5);
+    p.setY(-5);
+
+    painter.setFont(QFont("Arial", 1));
+
+    double xscale = printer.pageRect().width() / double(payTable->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
+    double yscale = printer.pageRect().height() / double(payTable->height() + 20);
     double scale = qMin(xscale, yscale);
     painter.translate(printer.paperRect().center());
     painter.scale(scale, scale);
-    painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 50);
+    painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 20);
 
     for (int page = 0; page < studAmount; page++)
     {
@@ -121,40 +136,93 @@ void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
             total += amount;
         }
 
+        payTable->resizeRowsToContents();
         ////////////////////////
-        //painter.drawText(rect(), Qt::AlignLeft, "Transaktionen von " + stud[page].getName() + " " + stud[page].getVorname());
+
         payTable->render(&painter);
+        painter.drawText(p, "Transaktionen von " + stud[page].getName() + " " + stud[page].getVorname());
 
         if (page != studAmount - 1) {
             printer.newPage();
         }
     }
-
     painter.end();
 }
 
 void Export::pdfSelected(QTableWidget *payTable, Student stud[], int selectedStudent)
 {
-    //QFile::remove("selected.pdf");        potential problem
-
     QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
 
     QPainter painter(&printer);                                                     //https://doc.qt.io/qt-5/qpainter.html
+    painter.setFont(QFont("Arial", 1));
 
-    painter.setFont(QFont("Arial", 20));
-    painter.drawText(rect(), Qt::AlignLeft, "Transaktionen von " + stud[selectedStudent].getName() + " " + stud[selectedStudent].getVorname());
+    QPoint p;
+    p.setX(5);
+    p.setY(-5);
 
-    double xscale = printer.pageRect().width() / double(payTable->width());              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(payTable->height());
+    double xscale = printer.pageRect().width() / double(payTable->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
+    double yscale = printer.pageRect().height() / double(payTable->height() + 20);
     double scale = qMin(xscale, yscale);
     painter.translate(printer.paperRect().center());
     painter.scale(scale, scale);
-    painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 50);
-
+    painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 20);
 
     payTable->render(&painter);
+    painter.drawText(p, "Transaktionen von " + stud[selectedStudent].getName() + " " + stud[selectedStudent].getVorname());
+
+    ////////////////////// NOTLÖSUNG /////////////////
+
+   /* QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676  complete copy and paste
+    QTextStream out(&strStream);
+
+    const int rowCount = payTable->rowCount();
+    const int columnCount = payTable->columnCount();
+
+    out <<  "<html>\n"
+        "<head>\n"
+        "<meta Content=\"Text/html; charset=Windows-1251\">\n"
+        <<  QString("<title>%1</title>\n").arg("Export")
+        <<  "</head>\n"
+        "<body bgcolor=#ffffff link=#5000A0>\n"
+        "<table border=1 cellspacing=0 cellpadding=2>\n";
+
+    // headers
+    out << "<thead><tr bgcolor=#f0f0f0>";
+    for (int column = 0; column < columnCount; column++)
+        if (!payTable->isColumnHidden(column))
+            out << QString("<th>%1</th>").arg(payTable->model()->headerData(column, Qt::Horizontal).toString());
+    out << "</tr></thead>\n";
+
+    // data table
+    for (int row = 0; row < rowCount; row++) {
+        out << "<tr>";
+        for (int column = 0; column < columnCount; column++) {
+            if (!payTable->isColumnHidden(column)) {
+                QString data = payTable->model()->data(payTable->model()->index(row, column)).toString().simplified();
+                out << QString("<td bkcolor=0>%1</td>").arg((!data.isEmpty()) ? data : QString("&nbsp;"));
+            }
+        }
+        out << "</tr>\n";
+    }
+    out <<  "</table>\n"
+        "</body>\n"
+        "</html>\n";
+
+    QTextDocument *document = new QTextDocument();
+    document->setHtml(strStream);
+
+    QPrinter printer;
+
+    QPrintDialog *dialog = new QPrintDialog(&printer, nullptr);
+    if (dialog->exec() == QDialog::Accepted) {
+        document->print(&printer);
+    }
+
+    delete document;*/
+
+    //////////////////////NOTLÖSUNG/////////////////
 }
 
 void Export::excelOverView(Student stud[], int studAmount, double total)
@@ -163,7 +231,7 @@ void Export::excelOverView(Student stud[], int studAmount, double total)
     QXlsx::Format format;
     format.setFontBold(true);
 
-    xlsx.write("A1", "Name", format);
+    xlsx.write("A1", "Name", format);       //headers
     xlsx.write("B1", "Vorname", format);
     xlsx.write("C1", "Guthaben", format);
 
