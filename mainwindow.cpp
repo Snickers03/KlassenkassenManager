@@ -207,6 +207,7 @@ void MainWindow::on_balanceButtonBox_accepted()
     ui->balanceSpinBox->setValue(0);
     ui->balanceTextEdit->clear();
 
+    on_tableWidget_cellDoubleClicked(selectedStudent, 0);
     saved = false;
 }
 
@@ -592,7 +593,7 @@ void MainWindow::on_actionPDF_triggered()
         break;
     case 5: exp.pdfAll(ui->payTable, stud, studAmount);
         break;
-    case 6: exp.pdfSelected(ui->payTable, stud, selectedStudent);
+    case 6: exp.pdfSelected(ui->tableWidget, ui->payTable, stud, selectedStudent);
     }
 }
 
@@ -600,6 +601,9 @@ void MainWindow::on_actionEditMode_triggered()
 {
     ui->tableWidget->setEditTriggers(QAbstractItemView::DoubleClicked);
     ui->payTable->setEditTriggers(QAbstractItemView::DoubleClicked);
+
+    //disconnect(ui->tableWidget, SIGNAL(on_tableWidget_cellDoubleClicked(int, int)));
+    ui->tableWidget->blockSignals(true);
 
     for (int i = 0; i < studAmount; i++) {                                                      //disable balance editing -> edit payments
         ui->tableWidget->item(i, 2)->setFlags(ui->tableWidget->item(i, 2)->flags() & ~Qt::ItemIsEditable);             //https://www.qtcentre.org/threads/26689-QTableWidget-one-column-editable
@@ -643,4 +647,7 @@ void MainWindow::on_editSaveButton_clicked()
 
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
+
+    //connect(ui->tableWidget, SIGNAl(on_tableWidget_cellDoubleClicked(int, int)), this, SLOT(on));
+    ui->tableWidget->blockSignals(false);
 }

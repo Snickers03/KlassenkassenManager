@@ -1,7 +1,7 @@
--range selection bei export
+total anzeigen bei pdf export
 
-Bugs: -manchmal absturz bei excel import 
-	-edits von zahlungen werden bei schülerwechsel nicht gespeichert
+Bugs: -manchmal absturz bei excel import
+	-pdf not working
 
 ?: Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler
 

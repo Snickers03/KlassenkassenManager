@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QTextDocument>
 #include <QPrintDialog>
+#include <QMessageBox>
 #include "xlsxdocument.h"
 
 Export::Export(QWidget *parent, int mode) :
@@ -149,7 +150,7 @@ void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
     painter.end();
 }
 
-void Export::pdfSelected(QTableWidget *payTable, Student stud[], int selectedStudent)
+void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[], int selectedStudent)
 {
     QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -162,6 +163,15 @@ void Export::pdfSelected(QTableWidget *payTable, Student stud[], int selectedStu
     p.setX(5);
     p.setY(-5);
 
+    int page = 1;
+
+    QItemSelectionModel *selections = tableWidget->selectionModel();
+    QModelIndexList selected = selections->selectedIndexes();
+
+    if (selected.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
+    }
+
     double xscale = printer.pageRect().width() / double(payTable->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
     double yscale = printer.pageRect().height() / double(payTable->height() + 20);
     double scale = qMin(xscale, yscale);
@@ -169,8 +179,48 @@ void Export::pdfSelected(QTableWidget *payTable, Student stud[], int selectedStu
     painter.scale(scale, scale);
     painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 20);
 
-    payTable->render(&painter);
-    painter.drawText(p, "Transaktionen von " + stud[selectedStudent].getName() + " " + stud[selectedStudent].getVorname());
+    for (int i = 0; i < selected.size(); i++)
+    {
+        payTable->model()->removeRows(0, payTable->rowCount());        //clear table
+        int currentRow = 0;
+        double total = 0;
+        int sel = selected[i].row();
+
+        if (!stud[sel].changed)
+        {
+            for(int j = 0; j < stud[sel].payCount; j++) {
+                QString date = stud[sel].pay[j].getDate();
+                QString reason = stud[sel].pay[j].getReason();
+                double amount = stud[sel].pay[j].getAmount();
+
+                payTable->insertRow(payTable->rowCount());
+                currentRow = payTable->rowCount() - 1;
+
+                payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
+                payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
+                payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
+                payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+                total += amount;
+                page++;
+
+            }
+            payTable->resizeRowsToContents();
+            payTable->render(&painter);
+            painter.drawText(p, "Transaktionen von " + stud[sel].getName() + " " + stud[sel].getVorname());
+
+            if (i != selected.size() - 3) {        /////////////////////////
+                printer.newPage();
+            }
+
+            stud[sel].changed = true;
+        }
+    }
+    for (int i = 0; i < tableWidget->rowCount(); i++) {     //reset stud.changed
+        stud[i].changed = false;
+    }
+
+    painter.end();
 
     ////////////////////// NOTLÖSUNG /////////////////
 

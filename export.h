@@ -19,7 +19,7 @@ public:
 
     void pdfOverView(QTableWidget *tableWidget);
     void pdfAll(QTableWidget *payTable, Student stud[], int studAmount);
-    void pdfSelected(QTableWidget *payTable, Student stud[], int selectedStudent);
+    void pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[], int selectedStudent);
 
     void excelOverView(Student stud[], int studAmount, double total);
     void excelAll(Student stud[], int studAmount);
@@ -33,6 +33,7 @@ private slots:
 private:
     Ui::Export *ui;
     QString filename;
+    QMessageBox message;
 };
 
 #endif // EXPORT_H

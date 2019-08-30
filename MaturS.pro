@@ -55,6 +55,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     images.qrc
 
-DISTFILES +=
+DISTFILES += \
+    images/logo.png
 
 include(3rdParty/qtxlsx/src/xlsx/qtxlsx.pri)
