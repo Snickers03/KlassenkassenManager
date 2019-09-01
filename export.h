@@ -19,11 +19,11 @@ public:
 
     void pdfOverView(QTableWidget *tableWidget);
     void pdfAll(QTableWidget *payTable, Student stud[], int studAmount);
-    void pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[], int selectedStudent);
+    void pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[]);
 
     void excelOverView(Student stud[], int studAmount, double total);
     void excelAll(Student stud[], int studAmount);
-    void excelSelected(Student stud[], int selectedStudent);
+    void excelSelected(Student stud[], QTableWidget* tableWidget);
 
     int mode;       //1: excel, 2: pdf
     int choice;

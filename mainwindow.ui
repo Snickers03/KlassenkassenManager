@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Klassenkassen-Manager</string>
+   <string>Klassenkassen Manager</string>
   </property>
   <property name="windowIcon">
    <iconset resource="images.qrc">
@@ -229,7 +229,7 @@ QLabel {
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QPushButton" name="clearSelectionButton">
+         <widget class="QToolButton" name="clearSelectionButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -238,7 +238,7 @@ QLabel {
           </property>
           <property name="minimumSize">
            <size>
-            <width>100</width>
+            <width>0</width>
             <height>23</height>
            </size>
           </property>
@@ -247,6 +247,20 @@ QLabel {
             <width>16777215</width>
             <height>20</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Auswahl aufheben</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QToolButton {	
+	border: 2px solid rgb(100, 100, 100); 
+	/*border-radius: 1px;*/
+	padding: 3px;
+}
+QToolButton:hover {
+	background-color: #99EA44;
+	border: 2px solid black;
+}</string>
           </property>
           <property name="text">
            <string>Auswahl aufheben</string>
@@ -254,7 +268,7 @@ QLabel {
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="chooseAllButton">
+         <widget class="QToolButton" name="chooseAllButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -263,7 +277,7 @@ QLabel {
           </property>
           <property name="minimumSize">
            <size>
-            <width>100</width>
+            <width>0</width>
             <height>23</height>
            </size>
           </property>
@@ -272,6 +286,20 @@ QLabel {
             <width>16777215</width>
             <height>20</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Alles auswählen</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QToolButton {	
+	border: 2px solid rgb(100, 100, 100); 
+	/*border-radius: 1px;*/
+	padding: 3px;
+}
+QToolButton:hover {
+	background-color: #99EA44;
+	border: 2px solid black;
+}</string>
           </property>
           <property name="text">
            <string>Alle auswählen</string>
@@ -386,11 +414,6 @@ QLabel {
         <property name="cornerButtonEnabled">
          <bool>true</bool>
         </property>
-        <row>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </row>
         <column>
          <property name="text">
           <string>Datum</string>
@@ -406,21 +429,6 @@ QLabel {
           <string>Betrag</string>
          </property>
         </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string/>
-         </property>
-        </item>
        </widget>
       </item>
       <item>

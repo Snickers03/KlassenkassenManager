@@ -150,7 +150,7 @@ void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
     painter.end();
 }
 
-void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[], int selectedStudent)
+void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[])
 {
     QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -329,30 +329,52 @@ void Export::excelAll(Student stud[], int studAmount)
     xlsx.saveAs(filename + ".xlsx");
 }
 
-void Export::excelSelected(Student stud[], int sel)
+void Export::excelSelected(Student stud[], QTableWidget* tableWidget)
 {
     QXlsx::Document xlsx;
     QXlsx::Format format;
     format.setFontBold(true);
-    xlsx.addSheet(stud[sel].getName());
 
-    xlsx.write("A1", "Zahlungen von", format);
-    xlsx.write("B1", stud[sel].getName(), format);
-    xlsx.write("C1", stud[sel].getVorname(), format);
+    QItemSelectionModel *selections = tableWidget->selectionModel();
+    QModelIndexList selected = selections->selectedIndexes();
 
-    xlsx.write("A3", "Datum", format);
-    xlsx.write("B3", "Grund", format);
-    xlsx.write("C3", "Menge", format);
-
-    for (int i = 0; i < stud[sel].payCount; i++)
-    {
-        xlsx.write(i + 4, 1, stud[sel].pay[i].getDate());
-        xlsx.write(i + 4, 2, stud[sel].pay[i].getReason());
-        xlsx.write(i + 4, 3, stud[sel].pay[i].getAmount());
+    if (selected.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
     }
 
-    xlsx.write(stud[sel].payCount + 5, 2, "Total:", format);
-    xlsx.write(stud[sel].payCount + 5, 3, stud[sel].getBalance(), format);
+    for (int i = 0; i < selected.size(); i++)
+    {
+        int sel = selected[i].row();
+
+        if (!stud[sel].changed)
+        {
+            xlsx.addSheet(stud[sel].getName());
+
+            xlsx.write("A1", "Zahlungen von", format);
+            xlsx.write("B1", stud[sel].getName(), format);
+            xlsx.write("C1", stud[sel].getVorname(), format);
+
+            xlsx.write("A3", "Datum", format);
+            xlsx.write("B3", "Grund", format);
+            xlsx.write("C3", "Menge", format);
+
+            for (int j = 0; j < stud[sel].payCount; j++)
+            {
+                xlsx.write(j + 4, 1, stud[sel].pay[j].getDate());
+                xlsx.write(j + 4, 2, stud[sel].pay[j].getReason());
+                xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
+            }
+
+            xlsx.write(stud[sel].payCount + 5, 2, "Total:", format);
+            xlsx.write(stud[sel].payCount + 5, 3, stud[sel].getBalance(), format);
+
+            stud[sel].changed = true;
+        }
+    }
+
+    for (int i = 0; i < tableWidget->rowCount(); i++) {     //reset stud.changed
+        stud[i].changed = false;
+    }
 
     xlsx.saveAs(filename + ".xlsx");
 }

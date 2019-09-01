@@ -207,7 +207,9 @@ void MainWindow::on_balanceButtonBox_accepted()
     ui->balanceSpinBox->setValue(0);
     ui->balanceTextEdit->clear();
 
-    on_tableWidget_cellDoubleClicked(selectedStudent, 0);
+    if (selectedStudent != -1) {
+        on_tableWidget_cellDoubleClicked(selectedStudent, 0);
+    }
     saved = false;
 }
 
@@ -572,7 +574,7 @@ void MainWindow::on_actionExcelExport_triggered()
         break;
     case 2: exp.excelAll(stud, studAmount);
         break;
-    case 3: exp.excelSelected(stud, selectedStudent);
+    case 3: exp.excelSelected(stud, ui->tableWidget);
     }
 }
 
@@ -593,7 +595,7 @@ void MainWindow::on_actionPDF_triggered()
         break;
     case 5: exp.pdfAll(ui->payTable, stud, studAmount);
         break;
-    case 6: exp.pdfSelected(ui->tableWidget, ui->payTable, stud, selectedStudent);
+    case 6: exp.pdfSelected(ui->tableWidget, ui->payTable, stud);
     }
 }
 
@@ -603,7 +605,7 @@ void MainWindow::on_actionEditMode_triggered()
     ui->payTable->setEditTriggers(QAbstractItemView::DoubleClicked);
 
     //disconnect(ui->tableWidget, SIGNAL(on_tableWidget_cellDoubleClicked(int, int)));
-    ui->tableWidget->blockSignals(true);
+    ui->tableWidget->blockSignals(true);        //block signals -> no stud change on double click
 
     for (int i = 0; i < studAmount; i++) {                                                      //disable balance editing -> edit payments
         ui->tableWidget->item(i, 2)->setFlags(ui->tableWidget->item(i, 2)->flags() & ~Qt::ItemIsEditable);             //https://www.qtcentre.org/threads/26689-QTableWidget-one-column-editable
@@ -615,30 +617,33 @@ void MainWindow::on_actionEditMode_triggered()
 
 void MainWindow::on_editSaveButton_clicked()
 {
-    studTotal = 0;
-
-    for (int i = 0; i < ui->payTable->rowCount(); i++)
+    if (selectedStudent != -1)
     {
-        stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
-        stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
+        studTotal = 0;
+        for (int i = 0; i < ui->payTable->rowCount(); i++)
+        {
+            stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
+            stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
 
-        double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();        //pre: 500, post 800
-        stud[selectedStudent].changeBalance(dif);
+            double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();        //pre: 500, post 800
+            stud[selectedStudent].changeBalance(dif);
 
-        stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());       
-        studTotal += stud[selectedStudent].pay[i].getAmount();
+            stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());
+            studTotal += stud[selectedStudent].pay[i].getAmount();
+        }
+
+        for (int i = 0; i < ui->tableWidget->rowCount(); i++)
+        {
+            stud[i].setName(ui->tableWidget->item(i, 0)->text());               //watch out for sort bugs
+            stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
+            updateTable(i);
+        }
+
+        ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));
+
+        Q_ASSERT(stud[selectedStudent].getBalance() == studTotal);          //bug detection
     }
 
-    for (int i = 0; i < ui->tableWidget->rowCount(); i++)
-    {
-        stud[i].setName(ui->tableWidget->item(i, 0)->text());               //watch out for sort bugs
-        stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
-        updateTable(i);
-    }
-
-    ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));
-
-    Q_ASSERT(stud[selectedStudent].getBalance() == studTotal);          //bug detection
     //qDebug() << "Studtotal: " << studTotal;
     //qDebug() << "balance: " << stud[selectedStudent].getBalance();
 
@@ -649,5 +654,5 @@ void MainWindow::on_editSaveButton_clicked()
     ui->editSaveButton->setVisible(false);
 
     //connect(ui->tableWidget, SIGNAl(on_tableWidget_cellDoubleClicked(int, int)), this, SLOT(on));
-    ui->tableWidget->blockSignals(false);
+    ui->tableWidget->blockSignals(false);           //re-enable signals
 }

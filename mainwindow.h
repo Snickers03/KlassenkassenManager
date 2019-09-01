@@ -71,7 +71,7 @@ private:
 
     int studAmount = 1;
     bool saved = false;
-    int selectedStudent;    //payments of selected student shown
+    int selectedStudent = -1;    //payments of selected student shown
     int sort = 1;           //1 = order by name, 2= vorname, 3 = balance
     double total;
     double studTotal;
