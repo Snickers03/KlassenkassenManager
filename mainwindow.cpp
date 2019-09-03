@@ -26,13 +26,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
 
-    databaseName = "studentDatabase.db";                                           // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
-    database = QSqlDatabase::addDatabase("QSQLITE");            //create database
+    databaseName = "studentDatabase.db";                                            // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
+    database = QSqlDatabase::addDatabase("QSQLITE");                                //create database
     database.setDatabaseName(databaseName);
     database.open();
     query = QSqlQuery(database);
 
-    on_action_open_triggered();     //auto-open existing database
+    on_action_open_triggered();                                                     //auto-open existing database
 
     ui->tableWidget->verticalHeader()->setVisible(true);
     ui->tableWidget->horizontalHeader()->setVisible(true);
@@ -94,7 +94,7 @@ void MainWindow::on_addStudent_triggered()
     QString name, vorname;
 
     bool res;
-    res = addStud.exec();       //opens addStudent dialog
+    res = addStud.exec();                                       //opens addStudent dialog
     if (res == false)
             return;
 
@@ -105,7 +105,7 @@ void MainWindow::on_addStudent_triggered()
     QDate currentDate = QDate::currentDate();                   //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
     QString date = currentDate.toString("dd.MM.yy");
 
-    stud[studAmount].pay[0].setDate(date);                     //save initial payment
+    stud[studAmount].pay[0].setDate(date);                      //save initial payment
     stud[studAmount].pay[0].setReason("Anfangsbestand");
     stud[studAmount].pay[0].setAmount(addStud.getBalance());
     stud[studAmount].payCount++;
@@ -172,21 +172,21 @@ void MainWindow::on_balanceButtonBox_accepted()
         return;
     }
 
-    QDate currentDate = QDate::currentDate();           //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
+    QDate currentDate = QDate::currentDate();                               //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
     QString date = currentDate.toString("dd.MM.yy");
 
     QItemSelectionModel *selections = ui->tableWidget->selectionModel();
     QModelIndexList selected = selections->selectedIndexes();
 
     if (selected.size() == 0) {
-        message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");        //error if no student selected
     }
 
     for (int i = 0; i < selected.size(); i++)
     {
         row = selected[i].row();
 
-        if (!stud[row].changed) {       //ensure balance not changed multiple times
+        if (!stud[row].changed) {                                           //ensure balance not changed multiple times
             stud[row].changeBalance(amount);
 
             int payCount = stud[row].payCount;
@@ -200,7 +200,7 @@ void MainWindow::on_balanceButtonBox_accepted()
         }
     }
 
-    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {     //reset stud.changed
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {                 //reset stud.changed
         stud[i].changed = false;
     }
 
@@ -219,7 +219,7 @@ void MainWindow::on_balanceButtonBox_rejected()
     ui->balanceTextEdit->clear();
 }
 
-void MainWindow::on_tableWidget_cellClicked(int row, int col)       //1 field selected == whole row selected
+void MainWindow::on_tableWidget_cellClicked(int row, int col)               //1 field selected == whole row selected
 {
     bool rowSelected = !ui->tableWidget->item(row, col)->isSelected();
 
@@ -241,9 +241,9 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
     ui->tableWidget->selectRow(row);
     ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
 
-    ui->payTable->model()->removeRows(0, ui->payTable->rowCount());        //clear table
+    ui->payTable->model()->removeRows(0, ui->payTable->rowCount());         //clear table
     int currentRow = 0;
-    studTotal = 0;           //current balance
+    studTotal = 0;                                                          //current balance
 
     for(int i = 0; i < stud[row].payCount; i++) {
 
@@ -289,7 +289,7 @@ void MainWindow::on_deleteStudent_triggered()
         studAmount--;
         stud[row].payCount = 0;
 
-        for (int i = row; i < studAmount; i++) {        //push back following objects
+        for (int i = row; i < studAmount; i++) {                    //push back following objects
             stud[i] = stud[i + 1];
         }
     }
@@ -332,7 +332,7 @@ void MainWindow::on_actionSpeichern_triggered()
         query.bindValue(":balance", balance);
 
         if (!query.exec()) {
-            message.critical(this, "Error", "yeet query");     //execute query & raise error if necessary
+            message.critical(this, "Error", "yeet query");          //execute query & raise error if necessary
         }
 
         for (int j = 0; j < stud[i].payCount; j++) {
@@ -371,7 +371,7 @@ void MainWindow::on_action_open_triggered()
     int idName = rec.indexOf("name");
 
     for (int i = 0; query.next(); i++) {
-        QString name = query.value(idName).toString();          //load names
+        QString name = query.value(idName).toString();                  //load names
         stud[i].setName(name);
     }
 
@@ -484,12 +484,12 @@ void MainWindow::on_actionGuthaben_triggered()
     on_action_open_triggered();
 }
 
-void MainWindow::on_actionExcel_triggered()       //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
+void MainWindow::on_actionExcel_triggered()         //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
 {
     QString filename = QFileDialog::getOpenFileName(this, "Importiere Excel-Datei", "C://", "Excel Dateien (*.xlsx) ;; Alle Dateien (*.*)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
-    //qDebug() << filename;               //crashes sometimes, changing font fixes it for some f reason
+    //qDebug() << filename;                         //crashes sometimes, changing font fixes it for some f reason
 
-    if (filename == "") {                                                   //cancel if no file selected
+    if (filename == "") {                                                       //cancel if no file selected
         return;
     }
 
@@ -538,7 +538,7 @@ void MainWindow::on_actionExcel_triggered()       //import               //https
         stud[i].setName(xlsx.cellAt(i + nameHeader[0] + 1, nameHeader[1])->value().toString());
         stud[i].setVorname(xlsx.cellAt(i + vornameHeader[0] + 1, vornameHeader[1])->value().toString());
 
-        if (balanceHeader[0] != 0)                          //nested to avoid mistaking total value for balance of student
+        if (balanceHeader[0] != 0)                                      //nested to avoid mistaking total value for balance of student
         {
             QDate currentDate = QDate::currentDate();                   //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
             QString date = currentDate.toString("dd.MM.yy");
@@ -604,8 +604,7 @@ void MainWindow::on_actionEditMode_triggered()
     ui->tableWidget->setEditTriggers(QAbstractItemView::DoubleClicked);
     ui->payTable->setEditTriggers(QAbstractItemView::DoubleClicked);
 
-    //disconnect(ui->tableWidget, SIGNAL(on_tableWidget_cellDoubleClicked(int, int)));
-    ui->tableWidget->blockSignals(true);        //block signals -> no stud change on double click
+    ui->tableWidget->blockSignals(true);                                                        //block signals -> no stud change on double click
 
     for (int i = 0; i < studAmount; i++) {                                                      //disable balance editing -> edit payments
         ui->tableWidget->item(i, 2)->setFlags(ui->tableWidget->item(i, 2)->flags() & ~Qt::ItemIsEditable);             //https://www.qtcentre.org/threads/26689-QTableWidget-one-column-editable
@@ -625,7 +624,7 @@ void MainWindow::on_editSaveButton_clicked()
             stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
             stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
 
-            double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();        //pre: 500, post 800
+            double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();
             stud[selectedStudent].changeBalance(dif);
 
             stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());
@@ -634,7 +633,7 @@ void MainWindow::on_editSaveButton_clicked()
 
         for (int i = 0; i < ui->tableWidget->rowCount(); i++)
         {
-            stud[i].setName(ui->tableWidget->item(i, 0)->text());               //watch out for sort bugs
+            stud[i].setName(ui->tableWidget->item(i, 0)->text());            //watch out for sort bugs       -propably none
             stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
             updateTable(i);
         }
@@ -644,15 +643,11 @@ void MainWindow::on_editSaveButton_clicked()
         Q_ASSERT(stud[selectedStudent].getBalance() == studTotal);          //bug detection
     }
 
-    //qDebug() << "Studtotal: " << studTotal;
-    //qDebug() << "balance: " << stud[selectedStudent].getBalance();
-
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->payTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
 
-    //connect(ui->tableWidget, SIGNAl(on_tableWidget_cellDoubleClicked(int, int)), this, SLOT(on));
     ui->tableWidget->blockSignals(false);           //re-enable signals
 }
