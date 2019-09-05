@@ -152,6 +152,8 @@ void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
 
 void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[])
 {
+    //////////ALTE LÖSUNG/////////
+    /*
     QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
@@ -220,59 +222,91 @@ void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Stud
         stud[i].changed = false;
     }
 
-    painter.end();
+    painter.end();*/
 
-    ////////////////////// NOTLÖSUNG /////////////////
+    ////////////////////// ALTE LÖSUNG /////////////////
 
-   /* QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676  complete copy and paste
+    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676  complete copy and paste
     QTextStream out(&strStream);
 
-    const int rowCount = payTable->rowCount();
-    const int columnCount = payTable->columnCount();
-
-    out <<  "<html>\n"
-        "<head>\n"
-        "<meta Content=\"Text/html; charset=Windows-1251\">\n"
-        <<  QString("<title>%1</title>\n").arg("Export")
-        <<  "</head>\n"
-        "<body bgcolor=#ffffff link=#5000A0>\n"
-        "<table border=1 cellspacing=0 cellpadding=2>\n";
-
-    // headers
-    out << "<thead><tr bgcolor=#f0f0f0>";
-    for (int column = 0; column < columnCount; column++)
-        if (!payTable->isColumnHidden(column))
-            out << QString("<th>%1</th>").arg(payTable->model()->headerData(column, Qt::Horizontal).toString());
-    out << "</tr></thead>\n";
-
-    // data table
-    for (int row = 0; row < rowCount; row++) {
-        out << "<tr>";
-        for (int column = 0; column < columnCount; column++) {
-            if (!payTable->isColumnHidden(column)) {
-                QString data = payTable->model()->data(payTable->model()->index(row, column)).toString().simplified();
-                out << QString("<td bkcolor=0>%1</td>").arg((!data.isEmpty()) ? data : QString("&nbsp;"));
-            }
-        }
-        out << "</tr>\n";
-    }
-    out <<  "</table>\n"
-        "</body>\n"
-        "</html>\n";
-
-    QTextDocument *document = new QTextDocument();
-    document->setHtml(strStream);
+    QItemSelectionModel *selections = tableWidget->selectionModel();
+    QModelIndexList selected = selections->selectedIndexes();
 
     QPrinter printer;
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(filename + ".pdf");
 
-    QPrintDialog *dialog = new QPrintDialog(&printer, nullptr);
-    if (dialog->exec() == QDialog::Accepted) {
-        document->print(&printer);
+    if (selected.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
     }
 
-    delete document;*/
+    for (int i = 0; i < selected.size(); i++) {
+        int sel = selected[i].row();
+        //double total = 0;
 
-    //////////////////////NOTLÖSUNG/////////////////
+        if (!stud[sel].changed)
+        {
+            out <<  "<html>\n"
+                "<head>\n"
+                "<meta Content=\"Text/html; charset=Windows-1251\">\n"
+                <<  QString("<title>%1</title>\n").arg("Export")
+                <<  "</head>\n"
+                "<body bgcolor=#ffffff link=#5000A0>\n"
+                <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[sel].getName() + " " + stud[sel].getVorname());
+            out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
+
+            // headers
+            out << "<thead><tr bgcolor=#f0f0f0>";
+
+            out << QString("<th>%1</th>").arg("Datum");
+            out << QString("<th>%1</th>").arg("Grund");
+            out << QString("<th>%1</th>").arg("Betrag");
+
+            out << "</tr></thead>\n";
+
+            for (int j = 0; j < stud[sel].payCount; j++)
+            {
+                out << "<tr>";
+
+                out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getDate());
+                out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getReason());
+                out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getAmount());
+
+                out << "</tr>\n";
+
+                //total += stud[sel].pay[j].getAmount();
+            }
+            out << "<tr> </tr>\n <tr>";
+            out << "<td bkcolor=0></td>";
+            out << "<td bkcolor=0>Total: </td>";
+            //out << QString("<td bkcolor=0>%1</td>").arg(total);
+            out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].getBalance());
+            out << "</tr>";
+
+            out <<  "</table>\n";
+
+            if (i < selected.size() - 3) {        /////////////////////////
+                out << "<div style=\"page-break-after:always\"></div>";
+
+                qDebug() << "yees";
+            }
+
+            stud[sel].changed = true;
+        }
+
+        out <<  "</body>\n"
+            "</html>\n";
+
+        QTextDocument *document = new QTextDocument();
+        document->setHtml(strStream);
+
+        document->print(&printer);
+        delete document;
+    }
+
+    for (int i = 0; i < tableWidget->rowCount(); i++) {     //reset stud.changed
+        stud[i].changed = false;
+    }
 }
 
 void Export::excelOverView(Student stud[], int studAmount, double total)
