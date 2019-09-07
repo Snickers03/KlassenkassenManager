@@ -591,11 +591,11 @@ void MainWindow::on_actionPDF_triggered()
 
     switch (exp.choice) {
     case 0: return;
-    case 4: exp.pdfOverView(ui->tableWidget);
+    case 4: exp.pdfOverView(studAmount, stud, total);
         break;
-    case 5: exp.pdfAll(ui->payTable, stud, studAmount);
+    case 5: exp.pdfAll(stud, studAmount);
         break;
-    case 6: exp.pdfSelected(ui->tableWidget, ui->payTable, stud);
+    case 6: exp.pdfSelected(ui->tableWidget, stud);
     }
 }
 

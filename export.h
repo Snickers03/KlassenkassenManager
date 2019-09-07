@@ -17,9 +17,9 @@ public:
     explicit Export(QWidget *parent = nullptr, int mode = 0);
     ~Export();
 
-    void pdfOverView(QTableWidget *tableWidget);
-    void pdfAll(QTableWidget *payTable, Student stud[], int studAmount);
-    void pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[]);
+    void pdfOverView(int studAmount, Student stud[], double total);
+    void pdfAll(Student stud[], int studAmount);
+    void pdfSelected(QTableWidget *tableWidget, Student stud[]);
 
     void excelOverView(Student stud[], int studAmount, double total);
     void excelAll(Student stud[], int studAmount);

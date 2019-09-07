@@ -15,10 +15,6 @@ Export::Export(QWidget *parent, int mode) :
 {
     ui->setupUi(this);
     this->mode = mode;
-
-    if (mode == 1) {
-        ui->warnLabel->setVisible(false);
-    }
 }
 
 Export::~Export()
@@ -66,167 +62,126 @@ void Export::on_buttonBox_accepted()
     }
 }
 
-void Export::pdfOverView(QTableWidget *tableWidget)     //somewhat fixed
+void Export::pdfOverView(int studAmount, Student stud[], double total)     //somewhat fixed
 {
-    QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
+    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
+    QTextStream out(&strStream);
+
+    QPrinter printer;                                    //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
 
-    QPainter painter(&printer);
+    out <<  "<html>\n"
+        "<head>\n"
+        "<meta Content=\"Text/html; charset=Windows-1251\">\n"
+        <<  QString("<title>%1</title>\n").arg("Export")
+        <<  "</head>\n"
+        "<body bgcolor=#ffffff link=#5000A0>\n"
+        <<  QString("<h3>%1</h3>\n").arg("Übersicht");
+    out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
 
-    QPoint p;
-    p.setX(5);
-    p.setY(-3);
+    // headers
+    out << "<thead><tr bgcolor=#f0f0f0>";
+    out << QString("<th>%1</th>").arg("Name");
+    out << QString("<th>%1</th>").arg("Vorname");
+    out << QString("<th>%1</th>").arg("Guthaben");
+    out << "</tr></thead>\n";
 
-    double xscale = printer.pageRect().width() / double(tableWidget->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(tableWidget->height());
-    double scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().center());
-    painter.scale(scale, scale);
-    painter.translate(-tableWidget->width()/ 2, -tableWidget->height()/ 2 + 20);
-    tableWidget->render(&painter);
+    for (int i = 0; i < studAmount; i++)
+    {
+        out << "<tr>";
+        out << QString("<td bkcolor=0>%1</td>").arg(stud[i].getName());
+        out << QString("<td bkcolor=0>%1</td>").arg(stud[i].getVorname());
+        out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].getBalance(), 'f', 2));
+        out << "</tr>\n";
+    }
 
-    //painter.restore();
-    painter.setFont(QFont("Arial", 1));
-    painter.drawText(p, "Übersicht");
+    out << "<tr> </tr>\n <tr>";
+    out << "<td bkcolor=0></td>";
+    out << "<td bkcolor=0>Total: </td>";
+    //out << QString("<td bkcolor=0>%1</td>").arg(total);
+    out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(total, 'f', 2));
+    out << "</tr>";
+
+    out <<  "</table>\n";
+    out <<  "</body>\n"
+        "</html>\n";
+
+    QTextDocument *document = new QTextDocument();
+    document->setHtml(strStream);
+
+    document->print(&printer);
+    delete document;
 }
 
-void Export::pdfAll(QTableWidget *payTable, Student stud[], int studAmount)
+void Export::pdfAll(Student stud[], int studAmount)
 {
-    QPrinter printer(QPrinter::HighResolution);             //https://doc.qt.io/qt-5/qtprintsupport-index.html
+    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
+    QTextStream out(&strStream);
+
+    QPrinter printer;             //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
 
-    QPainter painter;
-    painter.begin(&printer);
-
-    QPoint p;
-    p.setX(5);
-    p.setY(-5);
-
-    painter.setFont(QFont("Arial", 1));
-
-    double xscale = printer.pageRect().width() / double(payTable->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(payTable->height() + 20);
-    double scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().center());
-    painter.scale(scale, scale);
-    painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 20);
-
-    for (int page = 0; page < studAmount; page++)
+    for (int i = 0; i < studAmount; i++)
     {
-        ///////////update pay table
-        payTable->model()->removeRows(0, payTable->rowCount());        //clear table
-        int currentRow = 0;
-        double total = 0;           //current balance
+        out <<  "<html>\n"
+            "<head>\n"
+            "<meta Content=\"Text/html; charset=Windows-1251\">\n"
+            <<  QString("<title>%1</title>\n").arg("Export")
+            <<  "</head>\n"
+            "<body bgcolor=#ffffff link=#5000A0>\n"
+            <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[i].getName() + " " + stud[i].getVorname());
+        out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
 
-        for(int i = 0; i < stud[page].payCount; i++) {
+        // headers
+        out << "<thead><tr bgcolor=#f0f0f0>";
 
-            QString date = stud[page].pay[i].getDate();
-            QString reason = stud[page].pay[i].getReason();
-            double amount = stud[page].pay[i].getAmount();
+        out << QString("<th>%1</th>").arg("Datum");
+        out << QString("<th>%1</th>").arg("Grund");
+        out << QString("<th>%1</th>").arg("Betrag");
 
-            payTable->insertRow(payTable->rowCount());
-            currentRow = payTable->rowCount() - 1;
+        out << "</tr></thead>\n";
 
-            payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
-            payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
-            payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
-            payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+        for(int j = 0; j < stud[i].payCount; j++) {
+            out << "<tr>";
 
-            total += amount;
+            out << QString("<td bkcolor=0>%1</td>").arg(stud[i].pay[j].getDate());
+            out << QString("<td bkcolor=0>%1</td>").arg(stud[i].pay[j].getReason());
+            out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].pay[j].getAmount(), 'f', 2));
+
+            out << "</tr>\n";
         }
 
-        payTable->resizeRowsToContents();
-        ////////////////////////
+        out << "<tr> </tr>\n <tr>";
+        out << "<td bkcolor=0></td>";
+        out << "<td bkcolor=0>Total: </td>";
+        //out << QString("<td bkcolor=0>%1</td>").arg(total);
+        out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].getBalance(), 'f', 2));
+        out << "</tr>";
 
-        payTable->render(&painter);
-        painter.drawText(p, "Transaktionen von " + stud[page].getName() + " " + stud[page].getVorname());
+        out <<  "</table>\n";
 
-        if (page != studAmount - 1) {
-            printer.newPage();
+        if (i != studAmount - 1) {
+            out << "<div style=\"page-break-after:always\"></div>";
+            qDebug() << "yees";
         }
+
+        out <<  "</body>\n"
+            "</html>\n";
+
+        QTextDocument *document = new QTextDocument();
+        document->setHtml(strStream);
+
+        document->print(&printer);
+        delete document;
     }
-    painter.end();
+
 }
 
-void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Student stud[])
+void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
 {
-    //////////ALTE LÖSUNG/////////
-    /*
-    QPrinter printer(QPrinter::HighResolution);                                     //https://doc.qt.io/qt-5/qtprintsupport-index.html
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(filename + ".pdf");
-
-    QPainter painter(&printer);                                                     //https://doc.qt.io/qt-5/qpainter.html
-    painter.setFont(QFont("Arial", 1));
-
-    QPoint p;
-    p.setX(5);
-    p.setY(-5);
-
-    int page = 1;
-
-    QItemSelectionModel *selections = tableWidget->selectionModel();
-    QModelIndexList selected = selections->selectedIndexes();
-
-    if (selected.size() == 0) {
-        message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
-    }
-
-    double xscale = printer.pageRect().width() / double(payTable->width() + 20);              //https://stackoverflow.com/questions/45467942/how-can-i-print-a-qwidget-in-qt
-    double yscale = printer.pageRect().height() / double(payTable->height() + 20);
-    double scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().center());
-    painter.scale(scale, scale);
-    painter.translate(-payTable->width()/ 2, -payTable->height()/ 2 + 20);
-
-    for (int i = 0; i < selected.size(); i++)
-    {
-        payTable->model()->removeRows(0, payTable->rowCount());        //clear table
-        int currentRow = 0;
-        double total = 0;
-        int sel = selected[i].row();
-
-        if (!stud[sel].changed)
-        {
-            for(int j = 0; j < stud[sel].payCount; j++) {
-                QString date = stud[sel].pay[j].getDate();
-                QString reason = stud[sel].pay[j].getReason();
-                double amount = stud[sel].pay[j].getAmount();
-
-                payTable->insertRow(payTable->rowCount());
-                currentRow = payTable->rowCount() - 1;
-
-                payTable->setItem(currentRow, 0, new QTableWidgetItem(date));
-                payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
-                payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
-                payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-
-                total += amount;
-                page++;
-
-            }
-            payTable->resizeRowsToContents();
-            payTable->render(&painter);
-            painter.drawText(p, "Transaktionen von " + stud[sel].getName() + " " + stud[sel].getVorname());
-
-            if (i != selected.size() - 3) {        /////////////////////////
-                printer.newPage();
-            }
-
-            stud[sel].changed = true;
-        }
-    }
-    for (int i = 0; i < tableWidget->rowCount(); i++) {     //reset stud.changed
-        stud[i].changed = false;
-    }
-
-    painter.end();*/
-
-    ////////////////////// ALTE LÖSUNG /////////////////
-
-    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676  complete copy and paste
+    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
 
     QItemSelectionModel *selections = tableWidget->selectionModel();
@@ -270,7 +225,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Stud
 
                 out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getDate());
                 out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getReason());
-                out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getAmount());
+                out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].pay[j].getAmount(), 'f', 2));
 
                 out << "</tr>\n";
 
@@ -280,7 +235,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QTableWidget *payTable, Stud
             out << "<td bkcolor=0></td>";
             out << "<td bkcolor=0>Total: </td>";
             //out << QString("<td bkcolor=0>%1</td>").arg(total);
-            out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].getBalance());
+            out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].getBalance(), 'f', 2));
             out << "</tr>";
 
             out <<  "</table>\n";
