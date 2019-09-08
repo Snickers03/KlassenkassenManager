@@ -677,6 +677,11 @@ QToolButton:hover {
           <height>0</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
         <property name="placeholderText">
          <string>Zahlungsgrund</string>
         </property>

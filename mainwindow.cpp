@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
+    ui->balanceButtonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
 
     databaseName = "studentDatabase.db";                                            // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
     database = QSqlDatabase::addDatabase("QSQLITE");                                //create database
@@ -265,7 +266,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int)
     ui->payTable->resizeRowsToContents();      //makes cell bigger id doesnt fit      https://stackoverflow.com/questions/9544122/how-to-word-wrap-text-in-the-rows-and-columns-of-a-qtablewidget
 
     ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
-    ui->tableWidget->clearSelection();
+    //ui->tableWidget->clearSelection();
 }
 
 void MainWindow::on_chooseAllButton_clicked()

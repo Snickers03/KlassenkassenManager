@@ -1,6 +1,7 @@
 #include "addstudent.h"
 #include "ui_addstudent.h"
 #include "mainwindow.h"
+#include <QPushButton>
 
 addStudent::addStudent(QWidget *parent, QString name, QString vorname, double balance) :
     QDialog(parent),
@@ -10,6 +11,8 @@ addStudent::addStudent(QWidget *parent, QString name, QString vorname, double ba
     this->name = name;
     this->vorname = vorname;
     this->balance = balance;
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
 }
 
 addStudent::~addStudent()

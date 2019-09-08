@@ -2,6 +2,7 @@
 #include "ui_export.h"
 #include "mainwindow.h"
 #include <QFileDialog>
+#include <QPushButton>
 #include <QPrinter>
 #include <QPainter>
 #include <QTextDocument>
@@ -15,6 +16,8 @@ Export::Export(QWidget *parent, int mode) :
 {
     ui->setupUi(this);
     this->mode = mode;
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
 }
 
 Export::~Export()
@@ -99,7 +102,6 @@ void Export::pdfOverView(int studAmount, Student stud[], double total)     //som
     out << "<tr> </tr>\n <tr>";
     out << "<td bkcolor=0></td>";
     out << "<td bkcolor=0>Total: </td>";
-    //out << QString("<td bkcolor=0>%1</td>").arg(total);
     out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(total, 'f', 2));
     out << "</tr>";
 
@@ -156,7 +158,6 @@ void Export::pdfAll(Student stud[], int studAmount)
         out << "<tr> </tr>\n <tr>";
         out << "<td bkcolor=0></td>";
         out << "<td bkcolor=0>Total: </td>";
-        //out << QString("<td bkcolor=0>%1</td>").arg(total);
         out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].getBalance(), 'f', 2));
         out << "</tr>";
 
@@ -197,7 +198,6 @@ void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
 
     for (int i = 0; i < selected.size(); i++) {
         int sel = selected[i].row();
-        //double total = 0;
 
         if (!stud[sel].changed)
         {
@@ -228,16 +228,12 @@ void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
                 out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].pay[j].getAmount(), 'f', 2));
 
                 out << "</tr>\n";
-
-                //total += stud[sel].pay[j].getAmount();
             }
             out << "<tr> </tr>\n <tr>";
             out << "<td bkcolor=0></td>";
             out << "<td bkcolor=0>Total: </td>";
-            //out << QString("<td bkcolor=0>%1</td>").arg(total);
             out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].getBalance(), 'f', 2));
             out << "</tr>";
-
             out <<  "</table>\n";
 
             if (i < selected.size() - 3) {        /////////////////////////
@@ -314,7 +310,6 @@ void Export::excelAll(Student stud[], int studAmount)
         xlsx.write(stud[i].payCount + 5, 2, "Total:", format);
         xlsx.write(stud[i].payCount + 5, 3, stud[i].getBalance(), format);
     }
-
     xlsx.saveAs(filename + ".xlsx");
 }
 
