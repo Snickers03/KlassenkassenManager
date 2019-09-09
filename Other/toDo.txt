@@ -1,7 +1,11 @@
 logo in windows anzeigen
+hide paywidget during edit mode -> highlight edit mode
+minimalbreite für zellen bei pdf export
 
 Bugs: -manchmal absturz bei excel import
 
 
-?: Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler
+?: -Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler
+   -delete: alles ausgewählte gelöscht
+   -file dialog für öffnen -> achtung vor löschen von momentaner datei
 

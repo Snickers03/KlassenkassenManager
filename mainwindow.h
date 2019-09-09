@@ -65,6 +65,10 @@ private slots:
 
     void on_editSaveButton_clicked();
 
+    void on_minusToolButton_clicked();
+
+    void on_plusToolButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QMessageBox message;
@@ -75,6 +79,7 @@ private:
     int sort = 1;           //1 = order by name, 2= vorname, 3 = balance
     double total;
     double studTotal;
+    bool edit = false;
 
     QString databaseName;
     QSqlDatabase database;

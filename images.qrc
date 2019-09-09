@@ -8,6 +8,7 @@
         <file>images/icons8-minus-96.png</file>
         <file>images/icons8-plus-96.png</file>
         <file>images/logo.png</file>
+        <file>images/icons8-edit-100-2.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
