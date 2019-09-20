@@ -54,19 +54,11 @@ private slots:
     void on_actionGuthaben_triggered();
     void on_clearSelectionButton_clicked();
     void on_actionExcel_triggered();
-
-    void on_tableWidget_cellClicked(int row, int column);
-
     void on_actionPDF_triggered();
-
     void on_actionExcelExport_triggered();
-
     void on_actionEditMode_triggered();
-
     void on_editSaveButton_clicked();
-
     void on_minusToolButton_clicked();
-
     void on_plusToolButton_clicked();
 
 private:

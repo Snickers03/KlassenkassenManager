@@ -37,14 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableWidget->verticalHeader()->setVisible(true);
     ui->tableWidget->horizontalHeader()->setVisible(true);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);           //select multiple rows at once
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);           //always select whole row
 
     ui->payTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->payTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->payTable->setSelectionBehavior(QAbstractItemView::SelectItems);
+    ui->payTable->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->payTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     on_tableWidget_cellDoubleClicked(0, 0);                                         //show payments of first person by default
 }
@@ -183,7 +183,7 @@ void MainWindow::on_balanceButtonBox_accepted()
     QString date = currentDate.toString("dd.MM.yy");
 
     QItemSelectionModel *selections = ui->tableWidget->selectionModel();
-    QModelIndexList selected = selections->selectedIndexes();
+    QModelIndexList selected = selections->selectedRows();
 
     if (selected.size() == 0) {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");        //error if no student selected
@@ -193,22 +193,15 @@ void MainWindow::on_balanceButtonBox_accepted()
     {
         row = selected[i].row();
 
-        if (!stud[row].changed) {                                           //ensure balance not changed multiple times
-            stud[row].changeBalance(amount);
+        stud[row].changeBalance(amount);
+        int payCount = stud[row].payCount;
+        stud[row].pay[payCount].setReason(reason);
+        stud[row].pay[payCount].setDate(date);
+        stud[row].pay[payCount].setAmount(amount);
 
-            int payCount = stud[row].payCount;
-            stud[row].pay[payCount].setReason(reason);
-            stud[row].pay[payCount].setDate(date);
-            stud[row].pay[payCount].setAmount(amount);
-
-            stud[row].payCount++;
-            stud[row].changed = true;
-            updateTable(row);
-        }
-    }
-
-    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {                 //reset stud.changed
-        stud[i].changed = false;
+        stud[row].payCount++;
+        stud[row].changed = true;
+        updateTable(row);
     }
 
     ui->balanceSpinBox->setValue(0);
@@ -226,53 +219,38 @@ void MainWindow::on_balanceButtonBox_rejected()
     ui->balanceTextEdit->clear();
 }
 
-void MainWindow::on_tableWidget_cellClicked(int, int)               //likely obsolete          1 field selected == whole row selected
-{
-    /*bool rowSelected = !ui->tableWidget->item(row, col)->isSelected();
-
-    if (rowSelected)
-    {
-        ui->tableWidget->item(row, 0)->setSelected(false);
-        ui->tableWidget->item(row, 1)->setSelected(false);
-        ui->tableWidget->item(row, 2)->setSelected(false);
-    }
-    else if (!rowSelected)
-    {
-        ui->tableWidget->selectRow(row);
-    }*/
-}
-
 void MainWindow::on_tableWidget_cellDoubleClicked(int row, int col)
 {
     if (edit == false || (edit == true && col == 2))                            //if edit enable, only execute if balance row double clicked
     {
-        if (edit == true) {
-            if (selectedStudent != -1)
-            {
-                studTotal = 0;
-                for (int i = 0; i < ui->payTable->rowCount(); i++)
-                {
-                    stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
-                    stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
-
-                    double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();
-                    stud[selectedStudent].changeBalance(dif);
-
-                    stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());
-                    studTotal += stud[selectedStudent].pay[i].getAmount();
-                }
-
-                for (int i = 0; i < ui->tableWidget->rowCount(); i++)
-                {
-                    stud[i].setName(ui->tableWidget->item(i, 0)->text());            //watch out for sort bugs       -propably none
-                    stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
-                    updateTable(i);
-                }
-
-                ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));
-            }
-        }
         selectedStudent = row;
+
+        if (edit == true) {
+
+            studTotal = 0;
+
+            for (int i = 0; i < ui->payTable->rowCount(); i++)
+            {
+                stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
+                stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
+
+                double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();
+                stud[selectedStudent].changeBalance(dif);
+
+                stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());
+                studTotal += stud[selectedStudent].pay[i].getAmount();
+            }
+
+            for (int i = 0; i < ui->tableWidget->rowCount(); i++)
+            {
+                stud[i].setName(ui->tableWidget->item(i, 0)->text());            //watch out for sort bugs       -propably none
+                stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
+                updateTable(i);
+            }
+
+            ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));
+
+        }
         ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
 
         ui->payTable->model()->removeRows(0, ui->payTable->rowCount());         //clear table
@@ -297,7 +275,6 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int col)
         }
 
         ui->payTable->resizeRowsToContents();  //makes cell bigger if doesnt fit      https://stackoverflow.com/questions/9544122/how-to-word-wrap-text-in-the-rows-and-columns-of-a-qtablewidget
-
         ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
     }
 }
@@ -315,6 +292,81 @@ void MainWindow::on_clearSelectionButton_clicked()
 
 void MainWindow::on_deleteStudent_triggered()
 {
+    /////////////////new for multiple students//////
+    QItemSelectionModel *studSelections = ui->tableWidget->selectionModel();
+    QModelIndexList studSel = studSelections->selectedRows();///////////////
+
+    QItemSelectionModel *paySelections = ui->payTable->selectionModel();
+    QModelIndexList paySel = paySelections->selectedRows();
+    int row;
+    int oldStudAmount = studAmount;
+    int oldPayCount = stud[selectedStudent].payCount;
+
+    if (studSel.size() == 0 && paySel.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler oder Zahlung ausgewählt");        //error if no student selected
+    }
+
+    for (int i = 0; i < paySel.size(); i++)
+    {
+        row = paySel[i].row();
+        stud[selectedStudent].changeBalance(-stud[selectedStudent].pay[row].getAmount());        //change balance
+        stud[selectedStudent].payCount--;
+        stud[selectedStudent].pay[row].changed = true;
+    }
+
+    for (int i = oldPayCount; i >= 0; i--)
+    {
+        if (stud[selectedStudent].pay[i].changed) {
+            for (int j = i; j < oldPayCount; j++)
+            {
+                stud[selectedStudent].pay[j] = stud[selectedStudent].pay[j + 1];        //pull back following objects
+            }
+        }
+    }
+
+    ui->balanceLineEdit->setText(QString::number(stud[selectedStudent].getBalance(), 'f', 2));
+
+    for (int i = 0; i < oldPayCount; i++) {
+        stud[selectedStudent].pay[i].changed = false;
+    }
+
+    ui->payTable->setRowCount(stud[selectedStudent].payCount);
+    on_tableWidget_cellDoubleClicked(selectedStudent, 2);
+
+///////////////////////
+
+    for (int i = 0; i < studSel.size(); i++)
+    {
+        row = studSel[i].row();
+        studAmount--;
+        stud[row].payCount = 0;
+        stud[row].changed = true;
+    }
+
+    for (int i = oldStudAmount; i >= 0; i--)
+    {
+        if (stud[i].changed) {
+            for (int j = i; j < oldStudAmount; j++)
+            {
+                stud[j] = stud[j + 1];          //push back following objects
+            }
+        }
+    }
+
+    for (int i = 0; i < oldStudAmount; i++) {                 //reset stud.changed
+        stud[i].changed = false;
+    }
+
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++)
+    {
+        updateTable(i);
+    }
+    ui->tableWidget->setRowCount(studAmount);                   //remove empty rows
+    ui->tableWidget->clearSelection();
+
+    saved = false;
+    ////////////////////////old solution working for single stud///////
+    /*
     int row = ui->tableWidget->currentRow();
 
     if (ui->tableWidget->hasFocus())
@@ -345,6 +397,7 @@ void MainWindow::on_deleteStudent_triggered()
         message.critical(this, "Error", "Kein Schüler ausgewählt!");
     }
     saved = false;
+    */
 }
 
 
@@ -645,6 +698,10 @@ void MainWindow::on_actionEditMode_triggered()
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectItems);
     ui->tableWidget->clearSelection();
 
+    ui->payTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->payTable->setSelectionBehavior(QAbstractItemView::SelectItems);
+    ui->payTable->clearSelection();
+
     for (int i = 0; i < studAmount; i++) {                                                      //disable balance editing -> edit payments
         ui->tableWidget->item(i, 2)->setFlags(ui->tableWidget->item(i, 2)->flags() & ~Qt::ItemIsEditable);             //https://www.qtcentre.org/threads/26689-QTableWidget-one-column-editable
     }
@@ -696,6 +753,10 @@ void MainWindow::on_editSaveButton_clicked()
     ui->tableWidget->setSelectionMode(QAbstractItemView::MultiSelection);           //select multiple rows at once
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->clearSelection();
+
+    ui->payTable->setSelectionMode(QAbstractItemView::MultiSelection);           //select multiple rows at once
+    ui->payTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->payTable->clearSelection();
 
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);

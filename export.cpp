@@ -157,7 +157,7 @@ void Export::pdfAll(Student stud[], int studAmount)
 
         out << "<tr> </tr>\n <tr>";
         out << "<td bkcolor=0></td>";
-        out << "<td bkcolor=0>Total: </td>";
+        out << "<td bkcolor=0 width=30%>Total: </td>";
         out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].getBalance(), 'f', 2));
         out << "</tr>";
 
@@ -177,7 +177,6 @@ void Export::pdfAll(Student stud[], int studAmount)
         document->print(&printer);
         delete document;
     }
-
 }
 
 void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
@@ -186,7 +185,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
     QTextStream out(&strStream);
 
     QItemSelectionModel *selections = tableWidget->selectionModel();
-    QModelIndexList selected = selections->selectedIndexes();
+    QModelIndexList selected = selections->selectedRows();
 
     QPrinter printer;
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -196,54 +195,49 @@ void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
         message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
     }
 
-    for (int i = 0; i < selected.size(); i++) {
+    for (int i = 0; i < selected.size(); i++)
+    {
         int sel = selected[i].row();
 
-        if (!stud[sel].changed)
-        {
-            out <<  "<html>\n"
+        out <<  "<html>\n"
                 "<head>\n"
                 "<meta Content=\"Text/html; charset=Windows-1251\">\n"
-                <<  QString("<title>%1</title>\n").arg("Export")
-                <<  "</head>\n"
-                "<body bgcolor=#ffffff link=#5000A0>\n"
-                <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[sel].getName() + " " + stud[sel].getVorname());
-            out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
+             <<  QString("<title>%1</title>\n").arg("Export")
+              <<  "</head>\n"
+                  "<body bgcolor=#ffffff link=#5000A0>\n"
+               <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[sel].getName() + " " + stud[sel].getVorname());
+        out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
 
-            // headers
-            out << "<thead><tr bgcolor=#f0f0f0>";
+        // headers
+        out << "<thead><tr bgcolor=#f0f0f0>";
 
-            out << QString("<th>%1</th>").arg("Datum");
-            out << QString("<th>%1</th>").arg("Grund");
-            out << QString("<th>%1</th>").arg("Betrag");
+        out << QString("<th>%1</th>").arg("Datum");
+        out << QString("<th>%1</th>").arg("Grund");
+        out << QString("<th>%1</th>").arg("Betrag");
 
-            out << "</tr></thead>\n";
+        out << "</tr></thead>\n";
 
-            for (int j = 0; j < stud[sel].payCount; j++)
-            {
-                out << "<tr>";
-
-                out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getDate());
-                out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getReason());
-                out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].pay[j].getAmount(), 'f', 2));
-
-                out << "</tr>\n";
-            }
-            out << "<tr> </tr>\n <tr>";
-            out << "<td bkcolor=0></td>";
-            out << "<td bkcolor=0>Total: </td>";
-            out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].getBalance(), 'f', 2));
-            out << "</tr>";
-            out <<  "</table>\n";
-
-            if (i < selected.size() - 3) {        /////////////////////////
-                out << "<div style=\"page-break-after:always\"></div>";
-
-                qDebug() << "yees";
-            }
-
-            stud[sel].changed = true;
+        for (int j = 0; j < stud[sel].payCount; j++)
+        {
+            out << "<tr>";
+            out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getDate());
+            out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getReason());
+            out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].pay[j].getAmount(), 'f', 2));
+            out << "</tr>\n";
         }
+        out << "<tr> </tr>\n <tr>";
+        out << "<td bkcolor=0></td>";
+        out << "<td bkcolor=0 width=30%>Total: </td>";
+        out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].getBalance(), 'f', 2));
+        out << "</tr>";
+        out <<  "</table>\n";
+
+        if (i < selected.size() - 1) {        /////////////////////////
+            out << "<div style=\"page-break-after:always\"></div>";
+            qDebug() << "yees";
+        }
+
+        stud[sel].changed = true;
 
         out <<  "</body>\n"
             "</html>\n";
@@ -253,10 +247,6 @@ void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
 
         document->print(&printer);
         delete document;
-    }
-
-    for (int i = 0; i < tableWidget->rowCount(); i++) {     //reset stud.changed
-        stud[i].changed = false;
     }
 }
 
@@ -320,7 +310,7 @@ void Export::excelSelected(Student stud[], QTableWidget* tableWidget)
     format.setFontBold(true);
 
     QItemSelectionModel *selections = tableWidget->selectionModel();
-    QModelIndexList selected = selections->selectedIndexes();
+    QModelIndexList selected = selections->selectedRows();
 
     if (selected.size() == 0) {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
@@ -329,39 +319,27 @@ void Export::excelSelected(Student stud[], QTableWidget* tableWidget)
     for (int i = 0; i < selected.size(); i++)
     {
         int sel = selected[i].row();
+        xlsx.addSheet(stud[sel].getName());
 
-        if (!stud[sel].changed)
+        xlsx.write("A1", "Zahlungen von", format);
+        xlsx.write("B1", stud[sel].getName(), format);
+        xlsx.write("C1", stud[sel].getVorname(), format);
+
+        xlsx.write("A3", "Datum", format);
+        xlsx.write("B3", "Grund", format);
+        xlsx.write("C3", "Menge", format);
+
+        for (int j = 0; j < stud[sel].payCount; j++)
         {
-            xlsx.addSheet(stud[sel].getName());
-
-            xlsx.write("A1", "Zahlungen von", format);
-            xlsx.write("B1", stud[sel].getName(), format);
-            xlsx.write("C1", stud[sel].getVorname(), format);
-
-            xlsx.write("A3", "Datum", format);
-            xlsx.write("B3", "Grund", format);
-            xlsx.write("C3", "Menge", format);
-
-            for (int j = 0; j < stud[sel].payCount; j++)
-            {
-                xlsx.write(j + 4, 1, stud[sel].pay[j].getDate());
-                xlsx.write(j + 4, 2, stud[sel].pay[j].getReason());
-                xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
-            }
-
-            xlsx.write(stud[sel].payCount + 5, 2, "Total:", format);
-            xlsx.write(stud[sel].payCount + 5, 3, stud[sel].getBalance(), format);
-
-            stud[sel].changed = true;
+            xlsx.write(j + 4, 1, stud[sel].pay[j].getDate());
+            xlsx.write(j + 4, 2, stud[sel].pay[j].getReason());
+            xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
         }
-    }
 
-    for (int i = 0; i < tableWidget->rowCount(); i++) {     //reset stud.changed
-        stud[i].changed = false;
-    }
+        xlsx.write(stud[sel].payCount + 5, 2, "Total:", format);
+        xlsx.write(stud[sel].payCount + 5, 3, stud[sel].getBalance(), format);
 
+        stud[sel].changed = true;
+    }
     xlsx.saveAs(filename + ".xlsx");
 }
-
-
-

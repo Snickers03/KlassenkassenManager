@@ -17,6 +17,7 @@ public:
     double getAmount();
     void setAmount(double amount);
 
+    bool changed = false;
 
 private:
     QString reason;
