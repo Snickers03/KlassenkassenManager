@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include "student.h"
 #include <QtSql>
+#include <QUndoStack>
 
 namespace Ui {
 class MainWindow;
@@ -35,7 +36,11 @@ public:
     void excelAll(QString filename);
     void excelSelected(QString filename);
 
-    Student stud[50];
+    void createActions();
+
+    //Student stud[50];
+
+    QVector<Student> stud;
 
 private slots:
 
@@ -61,6 +66,10 @@ private slots:
     void on_minusToolButton_clicked();
     void on_plusToolButton_clicked();
 
+    void on_actionUndo_triggered();
+
+    void on_actionRedo_triggered();
+
 private:
     Ui::MainWindow *ui;
     QMessageBox message;
@@ -77,6 +86,17 @@ private:
     QSqlDatabase database;
     QSqlQuery query;
     QSqlTableModel *model;
+
+    //
+    QAction *addAction;
+    QAction *deleteAction;
+    QAction *payAction;
+    QAction *editAction;
+
+    QAction *undoAction;
+    QAction *redoAction;
+
+    QUndoStack *undoStack;
 };
 
 #endif // MAINWINDOW_H

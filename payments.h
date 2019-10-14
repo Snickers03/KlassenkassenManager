@@ -7,6 +7,7 @@ class Payments
 {
 public:
     Payments();
+    Payments(QString date, QString reason, double amount);
 
     QString getReason();
     void setReason(QString reason);

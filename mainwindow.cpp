@@ -16,6 +16,7 @@
 #include <QPainter>
 #include <QFileDialog>
 #include "xlsxdocument.h"
+#include "commands.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
     ui->balanceButtonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
+
+    //stud.resize(50);        //delete later
 
     databaseName = "studentDatabase.db";                                            // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
     database = QSqlDatabase::addDatabase("QSQLITE");                                //create database
@@ -46,12 +49,32 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->payTable->setSelectionMode(QAbstractItemView::MultiSelection);
     ui->payTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    on_tableWidget_cellDoubleClicked(0, 0);                                         //show payments of first person by default
+    on_tableWidget_cellDoubleClicked(0, 0);  //show payments of first person by default
+
+    //
+    undoStack = new QUndoStack(this);
+    createActions();
+
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::createActions()
+{
+    addAction = new QAction(tr("&Schüler hinzufügen"), this);
+    deleteAction = new QAction(tr("&Löschen"), this);
+    payAction = new QAction(tr("&Zahlung erfassen"), this);
+    editAction = new QAction(tr("&Bearbeiten"), this);
+
+    undoAction = undoStack->createUndoAction(this, tr("&Undo"));
+    undoAction->setShortcuts(QKeySequence::Undo);
+
+    redoAction = undoStack->createRedoAction(this, tr("&Redo"));
+    redoAction->setShortcuts(QKeySequence::Redo);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)             //https://stackoverflow.com/questions/17480984/qt-how-do-i-handle-the-event-of-the-user-pressing-the-x-close-button
@@ -105,6 +128,10 @@ void MainWindow::on_addStudent_triggered()
     if (res == false)
             return;
 
+    QUndoCommand *addCommand = new AddCommand(stud, addStud.getVorname(), addStud.getName(), addStud.getBalance(), ui->tableWidget, ui->totalLineEdit);
+    undoStack->push(addCommand);
+
+    /*
     stud[studAmount].setVorname(addStud.getVorname());          //set object values
     stud[studAmount].setName(addStud.getName());
     stud[studAmount].setBalance(addStud.getBalance());
@@ -115,9 +142,9 @@ void MainWindow::on_addStudent_triggered()
     stud[studAmount].pay[0].setDate(date);                      //save initial payment
     stud[studAmount].pay[0].setReason("Anfangsbestand");
     stud[studAmount].pay[0].setAmount(addStud.getBalance());
-    stud[studAmount].payCount++;
+    stud[studAmount].payCount++;*/
 
-    addCell();
+    //updateTable(studAmount - 1);
 }
 
 void MainWindow::updateTable(int row)
@@ -125,14 +152,13 @@ void MainWindow::updateTable(int row)
     ui->tableWidget->item(row, 0)->setText(stud[row].getName());
     ui->tableWidget->item(row, 1)->setText(stud[row].getVorname());
     ui->tableWidget->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));        //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
-
     if (stud[row].getBalance() < 0) {
         ui->tableWidget->item(row, 2)->setTextColor(Qt::red);
     }
 
     total = 0;
 
-    for (int i = 0; i < studAmount; i++) {
+    for (int i = 0; i < stud.size(); i++) {
         total += stud[i].getBalance();
     }
     ui->totalLineEdit->setText(QString::number(total, 'f', 2));
@@ -145,15 +171,15 @@ void MainWindow::addCell()
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());    //add new cell
     int currentRow = ui->tableWidget->rowCount() - 1;
 
-    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[studAmount].getName()));
-    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(stud[studAmount].getVorname()));
-    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[studAmount].getBalance(), 'f', 2)));
+    ui->tableWidget->setItem(currentRow, 0, new QTableWidgetItem(stud[currentRow].getName()));
+    ui->tableWidget->setItem(currentRow, 1, new QTableWidgetItem(stud[currentRow].getVorname()));
+    ui->tableWidget->setItem(currentRow, 2, new QTableWidgetItem(QString::number(stud[currentRow].getBalance(), 'f', 2)));
     ui->tableWidget->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
-    studAmount++;
+    //studAmount++;
     total = 0;
 
-    for (int i = 0; i < studAmount; i++) {
+    for (int i = 0; i < stud.size(); i++) {
         total += stud[i].getBalance();
     }
     ui->totalLineEdit->setText(QString::number(total, 'f', 2));
@@ -163,7 +189,6 @@ void MainWindow::addCell()
 
 void MainWindow::on_balanceButtonBox_accepted()
 {
-    int row;
     double amount;
     QString reason = ui->balanceTextEdit->toPlainText();
 
@@ -189,6 +214,16 @@ void MainWindow::on_balanceButtonBox_accepted()
         message.critical(this, "Error", "Kein Schüler ausgewählt!");        //error if no student selected
     }
 
+    QUndoCommand *payCommand = new PayCommand(stud, date, reason, amount, ui->tableWidget, selected, ui->totalLineEdit);
+    undoStack->push(payCommand);
+
+    /*QItemSelectionModel *selections = ui->tableWidget->selectionModel();
+    QModelIndexList selected = selections->selectedRows();
+
+    if (selected.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler ausgewählt!");        //error if no student selected
+    }
+
     for (int i = 0; i < selected.size(); i++)
     {
         row = selected[i].row();
@@ -202,7 +237,7 @@ void MainWindow::on_balanceButtonBox_accepted()
         stud[row].payCount++;
         stud[row].changed = true;
         updateTable(row);
-    }
+    }*/
 
     ui->balanceSpinBox->setValue(0);
     ui->balanceTextEdit->clear();
@@ -257,7 +292,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int col)
         int currentRow = 0;
         studTotal = 0;                                                          //current balance
 
-        for(int i = 0; i < stud[row].payCount; i++) {
+        for(int i = 0; i < stud[row].pay.size(); i++) {
 
             QString date = stud[row].pay[i].getDate();
             QString reason = stud[row].pay[i].getReason();
@@ -292,14 +327,28 @@ void MainWindow::on_clearSelectionButton_clicked()
 
 void MainWindow::on_deleteStudent_triggered()
 {
-    /////////////////new for multiple students//////
     QItemSelectionModel *studSelections = ui->tableWidget->selectionModel();
     QModelIndexList studSel = studSelections->selectedRows();///////////////
 
     QItemSelectionModel *paySelections = ui->payTable->selectionModel();
     QModelIndexList paySel = paySelections->selectedRows();
+
+    if (studSel.size() == 0 && paySel.size() == 0) {
+        message.critical(this, "Error", "Kein Schüler oder Zahlung ausgewählt");        //error if no student selected
+    }
+
+    QUndoCommand *deleteCommand = new DeleteCommand(stud, ui->tableWidget, ui->payTable, studSel, paySel, ui->totalLineEdit, ui->balanceLineEdit, selectedStudent);
+    undoStack->push(deleteCommand);
+
+    saved = false;
+    /////////////////new for multiple students//////
+    /*QItemSelectionModel *studSelections = ui->tableWidget->selectionModel();
+    QModelIndexList studSel = studSelections->selectedRows();///////////////
+
+    QItemSelectionModel *paySelections = ui->payTable->selectionModel();
+    QModelIndexList paySel = paySelections->selectedRows();
     int row;
-    int oldStudAmount = studAmount;
+    int oldStudAmount = stud.size();
     int oldPayCount = stud[selectedStudent].payCount;
 
     if (studSel.size() == 0 && paySel.size() == 0) {
@@ -364,7 +413,7 @@ void MainWindow::on_deleteStudent_triggered()
     ui->tableWidget->setRowCount(studAmount);                   //remove empty rows
     ui->tableWidget->clearSelection();
 
-    saved = false;
+    saved = false;*/
     ////////////////////////old solution working for single stud///////
     /*
     int row = ui->tableWidget->currentRow();
@@ -409,7 +458,7 @@ void MainWindow::on_actionSpeichern_triggered()
     query.exec("DROP TABLE payments");
     query.exec("CREATE TABLE IF NOT EXISTS payments(id integer primary key, studId integer, date text, reason text, amount float)");
 
-    for (int i = 0; i < studAmount; i++) {
+    for (int i = 0; i < stud.size(); i++) {
         QString name(stud[i].getName());
         QString vorname(stud[i].getVorname());
         double balance = stud[i].getBalance();
@@ -424,7 +473,7 @@ void MainWindow::on_actionSpeichern_triggered()
             message.critical(this, "Error", "yeet query");          //execute query & raise error if necessary
         }
 
-        for (int j = 0; j < stud[i].payCount; j++) {
+        for (int j = 0; j < stud[i].pay.size(); j++) {
             QString reason(stud[i].pay[j].getReason());
             QString date(stud[i].pay[j].getDate());
             double amount = stud[i].pay[j].getAmount();
@@ -446,7 +495,7 @@ void MainWindow::on_actionSpeichern_triggered()
 void MainWindow::on_action_open_triggered()
 {
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
-    studAmount = 0;
+    stud.clear();
 
     query.prepare("SELECT name FROM students ORDER BY CASE "
                   "WHEN :sort = 1 THEN name "
@@ -460,6 +509,8 @@ void MainWindow::on_action_open_triggered()
     int idName = rec.indexOf("name");
 
     for (int i = 0; query.next(); i++) {
+        stud.append(Student());                         //insert new Student object into stud vector
+
         QString name = query.value(idName).toString();                  //load names
         stud[i].setName(name);
     }
@@ -505,12 +556,12 @@ void MainWindow::on_action_open_triggered()
         order[i] = query.value(idName).toInt();             //get new student order -> match payments
     }
 
-    for (int i = 0; i < studAmount; i++) {
+    for (int i = 0; i < stud.size(); i++) {
         updateTable(i);
 
         ////////////////////////////////////////////////////////
         // load payments
-        stud[i].payCount = 0;               //reset pay count
+        //stud[i].payCount = 0;               //reset pay count
 
         query.prepare("SELECT * FROM payments WHERE studId = :id");
         query.bindValue(":id", order[i]);
@@ -520,6 +571,8 @@ void MainWindow::on_action_open_triggered()
         idName = rec.indexOf("reason");
 
         for (int j = 0; query.next(); j++) {
+            stud[i].pay.append(Payments());                     //insert new payment object into vector
+
             QString reason = query.value(idName).toString();
             stud[i].pay[j].setReason(reason);
         }
@@ -545,9 +598,7 @@ void MainWindow::on_action_open_triggered()
 
         for (int j = 0; query.next(); j++) {
             double amount = query.value(idName).toDouble();
-            stud[i].pay[j].setAmount(amount);
-
-            stud[i].payCount++;
+            stud[i].pay[j].setAmount(amount);           
         }
     }
 }
@@ -581,18 +632,19 @@ void MainWindow::on_actionExcel_triggered()         //import               //htt
     if (filename == "") {                                                       //cancel if no file selected
         return;
     }
-
+/////////////
+    stud.clear();
     int nameHeader[2] = {0, 0};
     int vornameHeader[2] = {0, 0};
     int balanceHeader[2] = {0, 0};
 
-    for (int i = 0; i < studAmount; i++)
+    /*for (int i = 0; i < stud.size(); i++)
     {
         stud[i].payCount = 0;
-    }
+    }*/
 
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
-    studAmount = 0;
+    //studAmount = 0;
 
     QXlsx::Document xlsx(filename);
 
@@ -624,6 +676,7 @@ void MainWindow::on_actionExcel_triggered()         //import               //htt
 
     for (int i = 0; xlsx.cellAt(i + nameHeader[0] + 1, nameHeader[1])->value().toString() != ""; i++)           //run until empty cell
     {
+        stud.append(Student());
         stud[i].setName(xlsx.cellAt(i + nameHeader[0] + 1, nameHeader[1])->value().toString());
         stud[i].setVorname(xlsx.cellAt(i + vornameHeader[0] + 1, vornameHeader[1])->value().toString());
 
@@ -633,7 +686,9 @@ void MainWindow::on_actionExcel_triggered()         //import               //htt
             QString date = currentDate.toString("dd.MM.yy");
 
             stud[i].setBalance(xlsx.cellAt(i + balanceHeader[0] + 1, balanceHeader[1])->value().toDouble());
-            stud[i].payCount = 1;
+            //stud[i].payCount = 1;
+            stud[i].pay.append(Payments());
+
             stud[i].pay[0].setDate(date);
             stud[i].pay[0].setReason("Anfangsbestand");
             stud[i].pay[0].setAmount(stud[i].getBalance());
@@ -659,9 +714,9 @@ void MainWindow::on_actionExcelExport_triggered()
 
     switch (exp.choice) {
     case 0: return;
-    case 1: exp.excelOverView(stud, studAmount, total);
+    case 1: exp.excelOverView(stud, stud.size(), total);
         break;
-    case 2: exp.excelAll(stud, studAmount);
+    case 2: exp.excelAll(stud, stud.size());
         break;
     case 3: exp.excelSelected(stud, ui->tableWidget);
     }
@@ -680,9 +735,9 @@ void MainWindow::on_actionPDF_triggered()
 
     switch (exp.choice) {
     case 0: return;
-    case 4: exp.pdfOverView(studAmount, stud, total);
+    case 4: exp.pdfOverView(stud.size(), stud, total);
         break;
-    case 5: exp.pdfAll(stud, studAmount);
+    case 5: exp.pdfAll(stud, stud.size());
         break;
     case 6: exp.pdfSelected(ui->tableWidget, stud);
     }
@@ -702,7 +757,7 @@ void MainWindow::on_actionEditMode_triggered()
     ui->payTable->setSelectionBehavior(QAbstractItemView::SelectItems);
     ui->payTable->clearSelection();
 
-    for (int i = 0; i < studAmount; i++) {                                                      //disable balance editing -> edit payments
+    for (int i = 0; i < stud.size(); i++) {                                                      //disable balance editing -> edit payments
         ui->tableWidget->item(i, 2)->setFlags(ui->tableWidget->item(i, 2)->flags() & ~Qt::ItemIsEditable);             //https://www.qtcentre.org/threads/26689-QTableWidget-one-column-editable
     }
 
@@ -782,4 +837,22 @@ void MainWindow::on_plusToolButton_clicked()
     ui->balanceSpinBox->setPrefix("+");
 }
 
+void MainWindow::on_actionUndo_triggered()
+{
+    undoStack->undo();
+    saved = false;
 
+    if (selectedStudent != -1) {                //refresh payTable
+        on_tableWidget_cellDoubleClicked(selectedStudent, 2);
+    }
+}
+
+void MainWindow::on_actionRedo_triggered()
+{
+    undoStack->redo();
+    saved = false;
+
+    if (selectedStudent != -1) {                //refresh payTable
+        on_tableWidget_cellDoubleClicked(selectedStudent, 2);
+    }
+}

@@ -8,7 +8,7 @@
 class Student
 {
 public:
-    Student(QString name, QString vorname, int balance);
+    Student(QString name, QString vorname, double balance);
     Student();
     QString getName();
     void setName(QString name);
@@ -22,7 +22,8 @@ public:
     void changeBalance(double amount);
     bool changed = false;
 
-    Payments pay[50];
+    //Payments pay[50];
+    QVector<Payments> pay;
     int payCount;
 
 private:

@@ -5,6 +5,14 @@ Payments::Payments()
 
 }
 
+Payments::Payments(QString date, QString reason, double amount)
+{
+    this->date = date;
+    this->reason = reason;
+    this->amount = amount;
+}
+
+
 void Payments::setReason(QString reason)
 {
     this->reason = reason;

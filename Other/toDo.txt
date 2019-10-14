@@ -1,5 +1,6 @@
-logo in windows anzeigen
-minimalbreite für zellen bei pdf export
+total aktualisieren bei undo/redo add student
+studAmount -> stud.size()
+mit stud.pushBack arbeiten
 
 
 Bugs: -manchmal absturz bei excel import

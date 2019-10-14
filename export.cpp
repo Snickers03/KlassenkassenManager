@@ -65,7 +65,7 @@ void Export::on_buttonBox_accepted()
     }
 }
 
-void Export::pdfOverView(int studAmount, Student stud[], double total)     //somewhat fixed
+void Export::pdfOverView(int studAmount, QVector<Student> &stud, double total)     //somewhat fixed
 {
     QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
@@ -116,7 +116,7 @@ void Export::pdfOverView(int studAmount, Student stud[], double total)     //som
     delete document;
 }
 
-void Export::pdfAll(Student stud[], int studAmount)
+void Export::pdfAll(QVector<Student> &stud, int studAmount)
 {
     QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
@@ -179,7 +179,7 @@ void Export::pdfAll(Student stud[], int studAmount)
     }
 }
 
-void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
+void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
 {
     QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
@@ -250,7 +250,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, Student stud[])
     }
 }
 
-void Export::excelOverView(Student stud[], int studAmount, double total)
+void Export::excelOverView(QVector<Student> &stud, int studAmount, double total)
 {
     QXlsx::Document xlsx;       //overview
     QXlsx::Format format;
@@ -273,7 +273,7 @@ void Export::excelOverView(Student stud[], int studAmount, double total)
     xlsx.saveAs(filename + ".xlsx");
 }
 
-void Export::excelAll(Student stud[], int studAmount)
+void Export::excelAll(QVector<Student> &stud, int studAmount)
 {
     QXlsx::Document xlsx;
     QXlsx::Format format;
@@ -303,7 +303,7 @@ void Export::excelAll(Student stud[], int studAmount)
     xlsx.saveAs(filename + ".xlsx");
 }
 
-void Export::excelSelected(Student stud[], QTableWidget* tableWidget)
+void Export::excelSelected(QVector<Student> &stud, QTableWidget* tableWidget)
 {
     QXlsx::Document xlsx;
     QXlsx::Format format;

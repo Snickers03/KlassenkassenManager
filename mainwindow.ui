@@ -846,6 +846,9 @@ QToolButton:hover {
      <addaction name="actionVorname"/>
      <addaction name="actionGuthaben"/>
     </widget>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
     <addaction name="addStudent"/>
     <addaction name="deleteStudent"/>
     <addaction name="actionEditMode"/>
@@ -980,6 +983,30 @@ QToolButton:hover {
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/images/icons8-undo-96.png</normaloff>:/images/images/icons8-undo-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rückgängig</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/images/icons8-redo-96.png</normaloff>:/images/images/icons8-redo-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Wiederherstellen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
    </property>
   </action>
  </widget>

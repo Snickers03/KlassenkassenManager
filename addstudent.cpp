@@ -3,15 +3,11 @@
 #include "mainwindow.h"
 #include <QPushButton>
 
-addStudent::addStudent(QWidget *parent, QString name, QString vorname, double balance) :
+addStudent::addStudent(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::addStudent)
 {
     ui->setupUi(this);
-    this->name = name;
-    this->vorname = vorname;
-    this->balance = balance;
-
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
 }
 

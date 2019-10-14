@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    commands.cpp \
     export.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -34,6 +35,7 @@ SOURCES += \
     student.cpp
 
 HEADERS += \
+    commands.h \
     export.h \
         mainwindow.h \
     payments.h \

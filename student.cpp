@@ -1,15 +1,15 @@
 #include "student.h"
 
-/*Student::Student(QString name, QString vorname, int balance)
+Student::Student(QString name, QString vorname, double balance)
 {
     this->name = name;
     this->vorname = vorname;
     this->balance = balance;
-} */
+}
 
 Student::Student()
 {
-
+    //pay.resize(50);
 };
 
 void Student::setName(QString name)
