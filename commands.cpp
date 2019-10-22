@@ -25,27 +25,15 @@ AddCommand::AddCommand(QVector<Student> &stud, QString vorname, QString name, do
 void AddCommand::undo()
 {
     qDebug() << "undo";
-    //st[st.size() - 1].pay.clear();
-    //st.clear();
     st.erase(st.begin() + st.size() - 1);
-    //*studAm -= 1;
     table->removeRow(table->rowCount() - 1);
 }
 
 void AddCommand::redo()
 {
+    table->blockSignals(true);
     st.append(Student(name, vorname, balance));
-    /*st[*studAm].setVorname(vorname);          //set object values
-    st[*studAm].setName(name);
-    st[*studAm].setBalance(balance);*/
-
     st[st.size() - 1].pay.append(Payments(date, "Anfangsbestand", balance));
-
-    /*st[*studAm].pay[0].setDate(date);                      //save initial payment
-    st[*studAm].pay[0].setReason("Anfangsbestand");
-    st[*studAm].pay[0].setAmount(balance);
-    st[*studAm].payCount++;*/
-
 
     table->insertRow(table->rowCount());    //add new cell
     int currentRow = table->rowCount() - 1;
@@ -55,17 +43,15 @@ void AddCommand::redo()
     table->setItem(currentRow, 2, new QTableWidgetItem(QString::number(balance, 'f', 2)));
     table->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
-    //*studAm += 1;
-    //st.append(Student());
-
     updateTable(currentRow, table, st, totLine);
+    table->blockSignals(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PayCommand::PayCommand(QVector<Student> &stud, QString date, QString reason, double amount, QTableWidget *tableWidget,
                        QModelIndexList selected, QLineEdit *totalLineEdit, QUndoCommand *parent)
-    : QUndoCommand (parent), st(stud)       //https://www.geeksforgeeks.org/passing-vector-constructor-c/
+    : QUndoCommand (parent), st(stud)           //https://www.geeksforgeeks.org/passing-vector-constructor-c/
 
 {
     qDebug() << "constructor";
@@ -89,29 +75,11 @@ PayCommand::PayCommand(QVector<Student> &stud, QString date, QString reason, dou
 void PayCommand::undo()
 {
     qDebug() << "undo";
-///////////old
-    /*for (int i = 0; i < sel.size(); i++)
-    {
-        row = sel[i].row();
-
-        st[row].changeBalance(amount);
-
-        int payCount = st[row].payCount;
-        st[row].pay[payCount].setReason("");
-        st[row].pay[payCount].setDate("");
-        st[row].pay[payCount].setAmount(0);
-
-        st[row].payCount--;
-
-        updateTable(row, table, st, totLine);
-    }*/
-
-    /////////new
 
     for (int i = 0; i < sel.size(); i++)
     {
         row = sel[i].row();
-        st[row].changeBalance(amount);
+        st[row].changeBalance(-amount);
 
         st[row].pay.erase(st[row].pay.begin() + st[row].pay.size() - 1);
         updateTable(row, table, st, totLine);
@@ -124,24 +92,15 @@ void PayCommand::redo()
     for (int i = 0; i < sel.size(); i++)
     {
         row = sel[i].row();
-
         st[row].changeBalance(amount);
-
         st[row].pay.append(Payments(date, reason, amount));
-        //int payCount = st[row].payCount;
-        /*st[row].pay[payCount].setReason(reason);
-        st[row].pay[payCount].setDate(date);
-        st[row].pay[payCount].setAmount(amount);*/
-
-        //st[row].payCount++;
 
         updateTable(row, table, st, totLine);
     }
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 DeleteCommand::DeleteCommand(QVector<Student> &stud, QTableWidget *tableWidget, QTableWidget *payTable, QModelIndexList studSel, QModelIndexList paySel, QLineEdit *totalLineEdit,
@@ -174,7 +133,6 @@ void DeleteCommand::undo()
     table->setItem(currentRow, 2, new QTableWidgetItem(QString::number(st[currentRow].getBalance(), 'f', 2)));
     table->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
-    //studAmount++;
     double total = 0;
 
     for (int i = 0; i < st.size(); i++) {
@@ -206,13 +164,6 @@ void DeleteCommand::redo()
 /////////////
     balLine->setText(QString::number(st[selectedSt].getBalance(), 'f', 2));
 
-    /*for (int i = 0; i < oldPayCount; i++) {
-        st[selectedSt].pay[i].changed = false;
-    }*/
-
-    //payTable->setRowCount(st[selectedSt].pay.size());
-
-
 ///////////////////////
 
     for (int i = 0; i < studSel.size(); i++)
@@ -239,8 +190,158 @@ void DeleteCommand::redo()
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+
+EditCommand::EditCommand(QVector<Student> &stud, QTableWidget *tableWidget, QTableWidget *payTable, int *selectedStudent, QLineEdit *totalLineEdit,
+                         QLineEdit *balanceLineEdit, int row, int column, int mode, QUndoCommand *parent)
+    : QUndoCommand (parent), st(stud)
+{
+    studTable = tableWidget;
+    this->payTable = payTable;
+    selectedSt = selectedStudent;
+    oldSelectedSt = *selectedStudent;
+    totLine = totalLineEdit;
+    balLine = balanceLineEdit;
+
+    this->row = row;
+    this->column = column;
+    this->mode = mode;
+
+    if (mode == 1)              //student edited
+    {
+        if (column == 0) {
+            oldValue = st[row].getName();
+            newValue = studTable->item(row, 0)->text();
+        }
+        else if (column == 1) {
+            oldValue = st[row].getVorname();
+            newValue = studTable->item(row, 1)->text();
+        }
+        else if (column == 2) {
+            oldValue = QString::number(st[row].getBalance(), 'f', 2);
+            newValue = studTable->item(row, 2)->text();
+        }
+        else {
+            qDebug() << "hello bug my old friend";
+        }
+    }
+    else if (mode == 2)         //payment edited
+    {
+        if (column == 0) {
+            oldValue = st[*selectedSt].pay[row].getDate();
+            newValue = payTable->item(row, 0)->text();
+        }
+        else if (column == 1) {
+            oldValue = st[*selectedSt].pay[row].getReason();
+            newValue = payTable->item(row, 1)->text();
+        }
+        else if (column == 2) {
+            oldValue = QString::number(st[*selectedSt].pay[row].getAmount(), 'f', 2);
+            newValue = payTable->item(row, 2)->text();
+        }
+        else {
+            qDebug() << "hello bug my old friend";
+        }
+    }
+    else {
+    qDebug() << "hello bug my old friend";
+    }
+}
+
+void EditCommand::undo()
+{
+    qDebug() << "edit undo";
+    if (mode == 1)
+    {
+        if (column == 0) {
+            st[row].setName(oldValue);
+        }
+        else if (column == 1) {
+            st[row].setVorname(oldValue);
+        }
+        else {
+            qDebug() << "hello bug my old friend";
+        }
+
+        updateTable(row, studTable, st, totLine);
+    }
+    else if (mode == 2)
+    {
+        if (column == 0) {
+            st[oldSelectedSt].pay[row].setDate(oldValue);
+        }
+        else if (column == 1) {
+            st[oldSelectedSt].pay[row].setReason(oldValue);
+        }
+        else if (column == 2) {
+            double dif = oldValue.toDouble() - newValue.toDouble();
+            st[oldSelectedSt].changeBalance(dif);
+
+            st[oldSelectedSt].pay[row].setAmount(oldValue.toDouble());
+            updateTable(oldSelectedSt, studTable, st, totLine);         //update total
+        }
+        else {
+            qDebug() << "hello bug my old friend";
+        }
+        *selectedSt = oldSelectedSt;        //show payments of affected student
+    }
+    else {
+    qDebug() << "hello bug my old friend";
+    }
+}
+
+void EditCommand::redo()
+{
+    if (mode == 1)              //student edited
+    {
+        if (column == 0) {
+            st[row].setName(newValue);
+        }
+        else if (column == 1) {
+            st[row].setVorname(newValue);
+        }
+        else {                                          //no "if (column == 2) because cant change balance column
+            qDebug() << "hello bug my old friend";
+        }
+        updateTable(row, studTable, st, totLine);
+    }
+    else if (mode == 2)         //payment edited
+    {
+        if (column == 0) {
+            st[oldSelectedSt].pay[row].setDate(newValue);
+        }
+        else if (column == 1) {
+            st[oldSelectedSt].pay[row].setReason(newValue);
+        }
+        else if (column == 2) {
+            double dif = newValue.toDouble() - oldValue.toDouble();
+            st[oldSelectedSt].changeBalance(dif);
+
+            st[oldSelectedSt].pay[row].setAmount(newValue.toDouble());
+            updateTable(oldSelectedSt, studTable, st, totLine);
+
+            payTable->blockSignals(true);
+            payTable->item(row, 2)->setText(QString::number(newValue.toDouble(), 'f', 2));      //ensures correct formatting
+            payTable->blockSignals(false);
+        }
+        else {
+            qDebug() << "hello bug my old friend";
+        }
+
+        *selectedSt = oldSelectedSt;            //show affected student
+    }
+    else {
+    qDebug() << "hello bug my old friend";
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
 void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit *totalLineEdit)
 {
+    table->blockSignals(true);
+
     table->item(row, 0)->setText(stud[row].getName());
     table->item(row, 1)->setText(stud[row].getVorname());
     table->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));        //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
@@ -254,6 +355,9 @@ void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit 
         total += stud[i].getBalance();
     }
     totalLineEdit->setText(QString::number(total, 'f', 2));
+    table->blockSignals(false);
 }
+
+
 
 

@@ -50,7 +50,7 @@ QTableWidget {
 
 QTableWidget::item:selected {
 	color: rgb(0, 0, 0);
-	background-color: #99EA44;
+	background: #99EA44;
 }
 
 QHeaderView::section {
@@ -876,9 +876,11 @@ QToolButton:hover {
    </attribute>
    <addaction name="actionSpeichern"/>
    <addaction name="separator"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="separator"/>
    <addaction name="addStudent"/>
    <addaction name="deleteStudent"/>
-   <addaction name="separator"/>
    <addaction name="actionEditMode"/>
   </widget>
   <action name="actionSpeichern">

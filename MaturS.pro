@@ -61,4 +61,4 @@ DISTFILES += \
     images/logo.png
 
 include(3rdParty/qtxlsx/src/xlsx/qtxlsx.pri)
-RC_FILE = manager.rc
+RC_FILE = KlassenkassenManager.rc

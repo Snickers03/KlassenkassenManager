@@ -75,5 +75,34 @@ private:
 
 /////////////////////////////////////////////////
 
+class EditCommand : public QUndoCommand
+{
+public:
+    EditCommand(QVector<Student> &stud, QTableWidget *tableWidget = nullptr, QTableWidget *payTable = nullptr, int *selectedStudent = nullptr,
+                QLineEdit *totalLineEdit = nullptr, QLineEdit *balanceLineEdit = nullptr, int row = 0, int column = 0, int mode = 0, QUndoCommand *parent = nullptr);
+
+    void redo() override;
+    void undo() override;
+
+private:
+    QVector<Student> &st;
+    QTableWidget *studTable;
+    QTableWidget *payTable;
+    //QTableWidget *table;
+    QLineEdit *totLine;
+    QLineEdit *balLine;
+    int *selectedSt;
+    int oldSelectedSt;
+
+    int row;
+    int column;
+    int mode;
+
+    QString oldValue;   //stores old value of chanced cell
+    QString newValue;   // ""    new ""
+};
+
+/////////////////////////////////////////////////
+
 void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit *totalLineEdit);
 #endif // COMMANDS_H

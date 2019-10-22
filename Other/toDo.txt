@@ -1,7 +1,15 @@
 total aktualisieren bei undo/redo add student
-studAmount -> stud.size()
-mit stud.pushBack arbeiten
 
+
+-edit mode -> entweder signal block bei allen aktionen, die tabelle ändern, oder
+	deaktivierung von anderen funktionen im edit mode. (oder automatisches  ende)
+-edit mode änderungen speichern vor beenden.
+
+Momentan: addCommand blockiert im edit mode, block signal in update table und ähnliches
+	-block signal in commands
+
+
+undo/redo for sort (/remove sort)
 
 Bugs: -manchmal absturz bei excel import
 

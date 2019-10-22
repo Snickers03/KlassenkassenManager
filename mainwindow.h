@@ -70,6 +70,10 @@ private slots:
 
     void on_actionRedo_triggered();
 
+    void on_tableWidget_cellChanged(int row, int column);
+
+    void on_payTable_cellChanged(int row, int column);
+
 private:
     Ui::MainWindow *ui;
     QMessageBox message;
@@ -92,6 +96,7 @@ private:
     QAction *deleteAction;
     QAction *payAction;
     QAction *editAction;
+    //QAction *sortAction;  ???
 
     QAction *undoAction;
     QAction *redoAction;
