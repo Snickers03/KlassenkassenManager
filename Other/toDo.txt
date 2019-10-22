@@ -17,5 +17,5 @@ Bugs: -manchmal absturz bei excel import
 ?: -Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler
    -verhindern von ungewolltem löschen
    -file dialog für öffnen -> achtung vor löschen von momentaner datei
-   -undo/redo: aufwendig
+   -delete löscht nur in aktiver tabelle
 

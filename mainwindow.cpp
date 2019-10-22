@@ -255,6 +255,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int col)
 
         ui->payTable->resizeRowsToContents();  //makes cell bigger if doesnt fit      https://stackoverflow.com/questions/9544122/how-to-word-wrap-text-in-the-rows-and-columns-of-a-qtablewidget
         ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));       //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
+        Q_ASSERT(stud[row].getBalance() == studTotal);          //bug detection
     }
     ui->tableWidget->blockSignals(false);
     ui->payTable->blockSignals(false);
@@ -349,7 +350,7 @@ void MainWindow::on_action_open_triggered()
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
     stud.clear();
 
-    query.prepare("SELECT name FROM students ORDER BY CASE "
+    query.prepare("SELECT id, name, vorname, balance FROM students ORDER BY CASE "
                   "WHEN :sort = 1 THEN name "
                   "WHEN :sort = 2 THEN vorname "
                   "WHEN :sort = 3 THEN balance "
@@ -358,99 +359,49 @@ void MainWindow::on_action_open_triggered()
     query.exec();
 
     QSqlRecord rec = query.record();
+    int idId = rec.indexOf("id");
     int idName = rec.indexOf("name");
+    int idVorname = rec.indexOf("vorname");
+    int idBalance = rec.indexOf("balance");
 
-    for (int i = 0; query.next(); i++) {
-        stud.append(Student());                         //insert new Student object into stud vector
+    int order[100];                                                     //turn into vector maybe
 
+    for (int i = 0; query.next(); i++)
+    {
         QString name = query.value(idName).toString();                  //load names
-        stud[i].setName(name);
-    }
+        QString vorname = query.value(idVorname).toString();
+        double balance = query.value(idBalance).toDouble();
+        order[i] = query.value(idId).toInt();                           //get new student order -> match payments
 
-    query.prepare("SELECT vorname FROM students ORDER BY CASE "
-                  "WHEN :sort = 1 THEN name "
-                  "WHEN :sort = 2 THEN vorname "
-                  "WHEN :sort = 3 THEN balance "
-                  "END");                                                                               //https://doc.qt.io/qt-5/qsqlquery.html#next
-    query.bindValue(":sort", sort);
-    query.exec();
-
-    for (int i = 0; query.next(); i++) {
-        QString vorname = query.value(idName).toString();       //load vornames
-        stud[i].setVorname(vorname);   
-    }
-
-    query.prepare("SELECT balance FROM students ORDER BY CASE "
-                  "WHEN :sort = 1 THEN name "
-                  "WHEN :sort = 2 THEN vorname "
-                  "WHEN :sort = 3 THEN balance "
-                  "END");                                                                               //https://doc.qt.io/qt-5/qsqlquery.html#next
-    query.bindValue(":sort", sort);
-    query.exec();
-
-    for (int i = 0; query.next(); i++) {
-        double balance = query.value(idName).toDouble();        //load balances
-        stud[i].setBalance(balance);
+        stud.append(Student(name, vorname, balance));                   //insert new Student object into stud vector
         addCell();
-    }
-
-    query.prepare("SELECT id FROM students ORDER BY CASE "
-                  "WHEN :sort = 1 THEN name "
-                  "WHEN :sort = 2 THEN vorname "
-                  "WHEN :sort = 3 THEN balance "
-                  "END");
-    query.bindValue(":sort", sort);
-    query.exec();
-
-    int order[50];
-
-    for (int i = 0; query.next(); i++) {
-        order[i] = query.value(idName).toInt();             //get new student order -> match payments
     }
 
     for (int i = 0; i < stud.size(); i++) {
         updateTable(i);
 
-        ////////////////////////////////////////////////////////
-        // load payments
+        //////////////// load payments
 
         query.prepare("SELECT * FROM payments WHERE studId = :id");
         query.bindValue(":id", order[i]);
         query.exec();
 
         rec = query.record();
-        idName = rec.indexOf("reason");
+        int idDate = rec.indexOf("date");
+        int idReason = rec.indexOf("reason");
+        int idAmount = rec.indexOf("amount");
 
         for (int j = 0; query.next(); j++) {
-            stud[i].pay.append(Payments());                     //insert new payment object into vector
+            QString date = query.value(idDate).toString();
+            QString reason = query.value(idReason).toString();
+            double amount = query.value(idAmount).toDouble();
 
-            QString reason = query.value(idName).toString();
-            stud[i].pay[j].setReason(reason);
+            stud[i].pay.append(Payments(date, reason, amount));                     //insert new payment object into vector
         }
-
-        query.prepare("SELECT * FROM payments WHERE studId = :id");
-        query.bindValue(":id", order[i]);
-        query.exec();
-
-        rec = query.record();
-        idName = rec.indexOf("date");
-
-        for (int j = 0; query.next(); j++) {
-            QString date = query.value(idName).toString();
-            stud[i].pay[j].setDate(date);
-        }
-
-        query.prepare("SELECT * FROM payments WHERE studId = :id");
-        query.bindValue(":id", order[i]);
-        query.exec();
-
-        rec = query.record();
-        idName = rec.indexOf("amount");
-
-        for (int j = 0; query.next(); j++) {
-            double amount = query.value(idName).toDouble();
-            stud[i].pay[j].setAmount(amount);           
-        }
+        ////////////// load payments
+    }
+    if (selectedStudent != -1) {
+        on_tableWidget_cellDoubleClicked(selectedStudent, 0);
     }
 }
 
@@ -630,33 +581,6 @@ void MainWindow::on_actionEditMode_triggered()
 
 void MainWindow::on_editSaveButton_clicked()
 {
-    /*if (selectedStudent != -1)
-    {
-        studTotal = 0;
-        for (int i = 0; i < ui->payTable->rowCount(); i++)
-        {
-            stud[selectedStudent].pay[i].setDate(ui->payTable->item(i, 0)->text());
-            stud[selectedStudent].pay[i].setReason(ui->payTable->item(i, 1)->text());
-
-            double dif = ui->payTable->item(i, 2)->text().toDouble() - stud[selectedStudent].pay[i].getAmount();
-            stud[selectedStudent].changeBalance(dif);
-
-            stud[selectedStudent].pay[i].setAmount(ui->payTable->item(i, 2)->text().toDouble());
-            studTotal += stud[selectedStudent].pay[i].getAmount();
-        }
-
-        for (int i = 0; i < ui->tableWidget->rowCount(); i++)
-        {
-            stud[i].setName(ui->tableWidget->item(i, 0)->text());            //watch out for sort bugs       -propably none
-            stud[i].setVorname(ui->tableWidget->item(i, 1)->text());         //read table content and save
-            updateTable(i);
-        }
-
-        ui->balanceLineEdit->setText(QString::number(studTotal, 'f', 2));
-
-        Q_ASSERT(stud[selectedStudent].getBalance() == studTotal);          //bug detection
-    }*/
-
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->payTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
