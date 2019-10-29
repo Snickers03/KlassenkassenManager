@@ -1,21 +1,11 @@
 total aktualisieren bei undo/redo add student
-
-
--edit mode -> entweder signal block bei allen aktionen, die tabelle ändern, oder
-	deaktivierung von anderen funktionen im edit mode. (oder automatisches  ende)
--edit mode änderungen speichern vor beenden.
-
-Momentan: addCommand blockiert im edit mode, block signal in update table und ähnliches
-	-block signal in commands
-
-
 undo/redo for sort (/remove sort)
+new file
 
 Bugs: -manchmal absturz bei excel import
 
 
 ?: -Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler
-   -verhindern von ungewolltem löschen
-   -file dialog für öffnen -> achtung vor löschen von momentaner datei
    -delete löscht nur in aktiver tabelle
+   -dark mode
 

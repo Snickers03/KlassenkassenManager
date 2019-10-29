@@ -18,18 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    loadSettings();
 
     ui->editLabel->setVisible(false);
     ui->editSaveButton->setVisible(false);
     ui->balanceButtonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
 
-    databaseName = "studentDatabase.db";                                            // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
+    //databaseName = "studentDatabase.db";                                            // https://wiki.qt.io/How_to_Store_and_Retrieve_Image_on_SQLite/de
     database = QSqlDatabase::addDatabase("QSQLITE");                                //create database
     database.setDatabaseName(databaseName);
     database.open();
     query = QSqlQuery(database);
 
-    on_action_open_triggered();                                                     //auto-open existing database
+    openDatabase();                                                    //auto-open existing database
+    this->setWindowTitle("KlassenkassenManager      |       " + databaseName);
 
     ui->tableWidget->verticalHeader()->setVisible(true);
     ui->tableWidget->horizontalHeader()->setVisible(true);
@@ -68,6 +70,22 @@ void MainWindow::createActions()
 
     redoAction = undoStack->createRedoAction(this, tr("&Redo"));
     redoAction->setShortcuts(QKeySequence::Redo);
+}
+
+void MainWindow::loadSettings()                                         //https://doc.qt.io/qt-5/qsettings.html#
+{
+    QSettings settings("Nic AG", "KlassenkassenManager");
+    settings.beginGroup("MainWindow");
+    databaseName = settings.value("dbFile", "studentDatabase.db").toString();
+    settings.endGroup();
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings("Nic AG", "KlassenkassenManager");
+    settings.beginGroup("MainWindow");
+    settings.setValue("dbFile", databaseName); //insert file variable
+    settings.endGroup();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)             //https://stackoverflow.com/questions/17480984/qt-how-do-i-handle-the-event-of-the-user-pressing-the-x-close-button
@@ -343,6 +361,46 @@ void MainWindow::on_actionSpeichern_triggered()
 
 void MainWindow::on_action_open_triggered()
 {
+    QString filename = QFileDialog::getOpenFileName(this, "Öffne Datenbank", "C://", "Datenbanken (*.db)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
+
+    if (filename == "") {                                                       //cancel if no file selected
+        return;
+    }
+
+    if (saved == false)
+    {
+        Sure su(this);
+        bool res;
+        su.setWindowTitle("Schliessen");
+        res = su.exec();
+
+        if(res == false) {
+            return;
+        }
+
+        switch (su.choice) {
+        case 0: return;                             //cancel
+        case 1: on_actionSpeichern_triggered();     //save and continue
+            break;
+        case 2:                                     //dont save and continue
+            break;
+        case 3: return;                             //cancel
+        }
+    }
+    database.close();
+    databaseName = filename;
+    database.setDatabaseName(databaseName);
+    database.open();
+    query = QSqlQuery(database);
+
+    this->setWindowTitle("KlassenkassenManager      |       " + databaseName);
+    selectedStudent = -1;
+    saveSettings();
+    openDatabase();
+}
+
+void MainWindow::openDatabase()
+{
     if (edit == true) {
         on_editSaveButton_clicked();   //saves edits
     }
@@ -400,8 +458,11 @@ void MainWindow::on_action_open_triggered()
         }
         ////////////// load payments
     }
-    if (selectedStudent != -1) {
+    if (selectedStudent != -1 && stud.size() != 0) {
         on_tableWidget_cellDoubleClicked(selectedStudent, 0);
+    }
+    else {
+        ui->payTable->model()->removeRows(0, ui->payTable->rowCount());         //clear table
     }
 }
 

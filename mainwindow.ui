@@ -48,6 +48,15 @@ QTableWidget {
 	min-height: 70%;
 }
 
+/*QTableWidget {
+    gridline-color: #a8a8a8;
+    font-size: 12pt;
+	min-width: 30%;
+	min-height: 70%;
+	color: rgb(255, 255, 255);
+	background-color: #424242;
+}*/
+
 QTableWidget::item:selected {
 	color: rgb(0, 0, 0);
 	background: #99EA44;
@@ -61,6 +70,16 @@ QHeaderView::section {
 	border-right: 1px solid rgb(30, 30, 30);
     font-size: 12pt;
 }
+
+/*QHeaderView::section {
+	color: rgb(0, 0, 0);
+    background-color: #212121;
+    padding: 2px;
+	border-style: none;
+    border-bottom: 1px solid rgb(30, 30, 30);
+	border-right: 1px solid rgb(30, 30, 30);
+    font-size: 12pt;
+}*/
 
 /*https://stackoverflow.com/questions/26162387/qtableview-qtablewidget-grid-stylesheet-grid-line-width*/
 
@@ -807,7 +826,7 @@ QToolButton:hover {
      <x>0</x>
      <y>0</y>
      <width>1157</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuDatei">

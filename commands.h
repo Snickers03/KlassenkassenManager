@@ -24,6 +24,7 @@ private:
     QString name;
     double balance;
     QString date;
+    double oldTotal;
 };
 
 //////////////////////////////////////////////////

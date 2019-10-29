@@ -38,7 +38,10 @@ public:
 
     void createActions();
 
-    //Student stud[50];
+    void loadSettings();
+    void saveSettings();
+
+    void openDatabase();
 
     QVector<Student> stud;
 

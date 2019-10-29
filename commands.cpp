@@ -16,7 +16,7 @@ AddCommand::AddCommand(QVector<Student> &stud, QString vorname, QString name, do
     this->vorname = vorname;
     this->name = name;
     this->balance = balance;
-
+    oldTotal = totLine->text().toDouble();
 
     QDate currentDate = QDate::currentDate();                   //http://qt.shoutwiki.com/wiki/Get_current_Date_and_Time_in_Qt
     date = currentDate.toString("dd.MM.yy");
@@ -27,6 +27,7 @@ void AddCommand::undo()
     qDebug() << "undo";
     st.erase(st.begin() + st.size() - 1);
     table->removeRow(table->rowCount() - 1);
+    totLine->setText(QString::number(oldTotal, 'f', 2));
 }
 
 void AddCommand::redo()
