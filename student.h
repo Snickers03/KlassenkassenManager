@@ -24,7 +24,7 @@ public:
 
     //Payments pay[50];
     QVector<Payments> pay;
-    int payCount;
+    //int payCount;
 
 private:
     QString vorname;

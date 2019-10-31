@@ -6,7 +6,7 @@
 
 AddCommand::AddCommand(QVector<Student> &stud, QString vorname, QString name, double balance, QTableWidget *tableWidget, QLineEdit *totalLineEdit,
                        QUndoCommand *parent)
-    : QUndoCommand(parent), st(stud)
+    : QUndoCommand(parent), st(stud)                //https://www.geeksforgeeks.org/passing-vector-constructor-c/
 {
     qDebug() << "constructor";
     st = stud;
@@ -52,11 +52,10 @@ void AddCommand::redo()
 
 PayCommand::PayCommand(QVector<Student> &stud, QString date, QString reason, double amount, QTableWidget *tableWidget,
                        QModelIndexList selected, QLineEdit *totalLineEdit, QUndoCommand *parent)
-    : QUndoCommand (parent), st(stud)           //https://www.geeksforgeeks.org/passing-vector-constructor-c/
+    : QUndoCommand (parent), st(stud)       //initializes reference of studVector
 
 {
     qDebug() << "constructor";
-    //st = stud;
     table = tableWidget;
     sel = selected;
     totLine = totalLineEdit;
@@ -64,13 +63,6 @@ PayCommand::PayCommand(QVector<Student> &stud, QString date, QString reason, dou
     this->date = date;
     this->reason = reason;
     this->amount = amount;
-
-    /*ui->balanceSpinBox->setValue(0);
-    ui->balanceTextEdit->clear();*/
-
-    /*if (selectedStudent != -1 && ui->tableWidget->item(selectedStudent, 0)->isSelected()) {
-        on_tableWidget_cellDoubleClicked(selectedStudent, 0);
-    }*/
 }
 
 void PayCommand::undo()
@@ -121,7 +113,7 @@ DeleteCommand::DeleteCommand(QVector<Student> &stud, QTableWidget *tableWidget, 
 
 void DeleteCommand::undo()
 {
-    st = oldStud;       //replaces stud vector with old copy
+    st = oldStud;                           //replaces stud vector with old copy
 
     table->model()->removeRows(0, table->rowCount());
 
@@ -144,10 +136,6 @@ void DeleteCommand::undo()
 
 void DeleteCommand::redo()
 {
-    //int row;
-    //int oldStudAmount = st.size();
-    //int oldPayCount = st[selectedSt].pay.size();
-
     for (int i = 0; i < paySel.size(); i++)
     {
         row = paySel[i].row();
@@ -162,10 +150,10 @@ void DeleteCommand::redo()
             payTable->removeRow(i);
         }
     }
-/////////////
+
     balLine->setText(QString::number(st[selectedSt].getBalance(), 'f', 2));
 
-///////////////////////
+    /////////////////////////////////////
 
     for (int i = 0; i < studSel.size(); i++)
     {
@@ -278,12 +266,12 @@ void EditCommand::undo()
             st[oldSelectedSt].changeBalance(dif);
 
             st[oldSelectedSt].pay[row].setAmount(oldValue.toDouble());
-            updateTable(oldSelectedSt, studTable, st, totLine);         //update total
+            updateTable(oldSelectedSt, studTable, st, totLine);             //update total
         }
         else {
             qDebug() << "hello bug my old friend";
         }
-        *selectedSt = oldSelectedSt;        //show payments of affected student
+        *selectedSt = oldSelectedSt;                                        //show payments of affected student
     }
     else {
     qDebug() << "hello bug my old friend";
@@ -292,7 +280,7 @@ void EditCommand::undo()
 
 void EditCommand::redo()
 {
-    if (mode == 1)              //student edited
+    if (mode == 1)                  //student edited
     {
         if (column == 0) {
             st[row].setName(newValue);
@@ -305,7 +293,7 @@ void EditCommand::redo()
         }
         updateTable(row, studTable, st, totLine);
     }
-    else if (mode == 2)         //payment edited
+    else if (mode == 2)             //payment edited
     {
         if (column == 0) {
             st[oldSelectedSt].pay[row].setDate(newValue);
@@ -345,7 +333,7 @@ void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit 
 
     table->item(row, 0)->setText(stud[row].getName());
     table->item(row, 1)->setText(stud[row].getVorname());
-    table->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));        //https://www.qtcentre.org/threads/40328-Formatting-for-two-decimal-places
+    table->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));
     if (stud[row].getBalance() < 0) {
         table->item(row, 2)->setTextColor(Qt::red);
     }

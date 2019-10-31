@@ -826,7 +826,7 @@ QToolButton:hover {
      <x>0</x>
      <y>0</y>
      <width>1157</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuDatei">
@@ -923,7 +923,7 @@ QToolButton:hover {
   <action name="addStudent">
    <property name="icon">
     <iconset resource="images.qrc">
-     <normaloff>:/images/images/icons8-add-new-100.png</normaloff>:/images/images/icons8-add-new-100.png</iconset>
+     <normaloff>:/images/images/icons8-plus-96.png</normaloff>:/images/images/icons8-plus-96.png</iconset>
    </property>
    <property name="text">
     <string>Hinzufügen</string>

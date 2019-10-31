@@ -1,6 +1,7 @@
 total aktualisieren bei undo/redo add student
 undo/redo for sort (/remove sort)
 new file
+new file for excel import
 
 Bugs: -manchmal absturz bei excel import
 

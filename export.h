@@ -17,12 +17,12 @@ public:
     explicit Export(QWidget *parent = nullptr, int mode = 0);
     ~Export();
 
-    void pdfOverView(int studAmount, QVector<Student> &stud, double total);
-    void pdfAll(QVector<Student> &stud, int studAmount);
+    void pdfOverView(QVector<Student> &stud, double total);
+    void pdfAll(QVector<Student> &stud);
     void pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud);
 
-    void excelOverView(QVector<Student> &stud, int studAmount, double total);
-    void excelAll(QVector<Student> &stud, int studAmount);
+    void excelOverView(QVector<Student> &stud, double total);
+    void excelAll(QVector<Student> &stud);
     void excelSelected(QVector<Student> &stud, QTableWidget* tableWidget);
 
     int mode;       //1: excel, 2: pdf

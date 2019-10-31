@@ -65,7 +65,7 @@ void Export::on_buttonBox_accepted()
     }
 }
 
-void Export::pdfOverView(int studAmount, QVector<Student> &stud, double total)     //somewhat fixed
+void Export::pdfOverView(QVector<Student> &stud, double total)     //somewhat fixed
 {
     QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
@@ -90,7 +90,7 @@ void Export::pdfOverView(int studAmount, QVector<Student> &stud, double total)  
     out << QString("<th>%1</th>").arg("Guthaben");
     out << "</tr></thead>\n";
 
-    for (int i = 0; i < studAmount; i++)
+    for (int i = 0; i < stud.size(); i++)
     {
         out << "<tr>";
         out << QString("<td bkcolor=0>%1</td>").arg(stud[i].getName());
@@ -116,7 +116,7 @@ void Export::pdfOverView(int studAmount, QVector<Student> &stud, double total)  
     delete document;
 }
 
-void Export::pdfAll(QVector<Student> &stud, int studAmount)
+void Export::pdfAll(QVector<Student> &stud)
 {
     QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
@@ -125,7 +125,7 @@ void Export::pdfAll(QVector<Student> &stud, int studAmount)
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename + ".pdf");
 
-    for (int i = 0; i < studAmount; i++)
+    for (int i = 0; i < stud.size(); i++)
     {
         out <<  "<html>\n"
             "<head>\n"
@@ -145,7 +145,7 @@ void Export::pdfAll(QVector<Student> &stud, int studAmount)
 
         out << "</tr></thead>\n";
 
-        for(int j = 0; j < stud[i].payCount; j++) {
+        for(int j = 0; j < stud[i].pay.size(); j++) {
             out << "<tr>";
 
             out << QString("<td bkcolor=0>%1</td>").arg(stud[i].pay[j].getDate());
@@ -163,7 +163,7 @@ void Export::pdfAll(QVector<Student> &stud, int studAmount)
 
         out <<  "</table>\n";
 
-        if (i != studAmount - 1) {
+        if (i != stud.size() - 1) {
             out << "<div style=\"page-break-after:always\"></div>";
             qDebug() << "yees";
         }
@@ -217,7 +217,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
 
         out << "</tr></thead>\n";
 
-        for (int j = 0; j < stud[sel].payCount; j++)
+        for (int j = 0; j < stud[sel].pay.size(); j++)
         {
             out << "<tr>";
             out << QString("<td bkcolor=0>%1</td>").arg(stud[sel].pay[j].getDate());
@@ -250,7 +250,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
     }
 }
 
-void Export::excelOverView(QVector<Student> &stud, int studAmount, double total)
+void Export::excelOverView(QVector<Student> &stud, double total)
 {
     QXlsx::Document xlsx;       //overview
     QXlsx::Format format;
@@ -260,26 +260,26 @@ void Export::excelOverView(QVector<Student> &stud, int studAmount, double total)
     xlsx.write("B1", "Vorname", format);
     xlsx.write("C1", "Guthaben", format);
 
-    for (int i = 0; i < studAmount; i++)
+    for (int i = 0; i < stud.size(); i++)
     {
         xlsx.write(i + 2, 1, stud[i].getName());
         xlsx.write(i + 2, 2, stud[i].getVorname());
         xlsx.write(i + 2, 3, stud[i].getBalance());
     }
 
-    xlsx.write(studAmount + 3, 2, "Total:", format);
-    xlsx.write(studAmount + 3, 3, total, format);
+    xlsx.write(stud.size() + 3, 2, "Total:", format);
+    xlsx.write(stud.size() + 3, 3, total, format);
 
     xlsx.saveAs(filename + ".xlsx");
 }
 
-void Export::excelAll(QVector<Student> &stud, int studAmount)
+void Export::excelAll(QVector<Student> &stud)
 {
     QXlsx::Document xlsx;
     QXlsx::Format format;
     format.setFontBold(true);
 
-    for (int i = 0; i < studAmount; i++)
+    for (int i = 0; i < stud.size(); i++)
     {
         xlsx.addSheet(stud[i].getName());
 
@@ -290,15 +290,15 @@ void Export::excelAll(QVector<Student> &stud, int studAmount)
         xlsx.write("B3", "Grund", format);
         xlsx.write("C3", "Menge", format);
 
-        for (int j = 0; j < stud[i].payCount; j++)
+        for (int j = 0; j < stud[i].pay.size(); j++)
         {
             xlsx.write(j + 4, 1, stud[i].pay[j].getDate());
             xlsx.write(j + 4, 2, stud[i].pay[j].getReason());
             xlsx.write(j + 4, 3, stud[i].pay[j].getAmount());
         }
 
-        xlsx.write(stud[i].payCount + 5, 2, "Total:", format);
-        xlsx.write(stud[i].payCount + 5, 3, stud[i].getBalance(), format);
+        xlsx.write(stud[i].pay.size() + 5, 2, "Total:", format);
+        xlsx.write(stud[i].pay.size() + 5, 3, stud[i].getBalance(), format);
     }
     xlsx.saveAs(filename + ".xlsx");
 }
@@ -329,15 +329,15 @@ void Export::excelSelected(QVector<Student> &stud, QTableWidget* tableWidget)
         xlsx.write("B3", "Grund", format);
         xlsx.write("C3", "Menge", format);
 
-        for (int j = 0; j < stud[sel].payCount; j++)
+        for (int j = 0; j < stud[sel].pay.size(); j++)
         {
             xlsx.write(j + 4, 1, stud[sel].pay[j].getDate());
             xlsx.write(j + 4, 2, stud[sel].pay[j].getReason());
             xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
         }
 
-        xlsx.write(stud[sel].payCount + 5, 2, "Total:", format);
-        xlsx.write(stud[sel].payCount + 5, 3, stud[sel].getBalance(), format);
+        xlsx.write(stud[sel].pay.size() + 5, 2, "Total:", format);
+        xlsx.write(stud[sel].pay.size() + 5, 3, stud[sel].getBalance(), format);
 
         stud[sel].changed = true;
     }
