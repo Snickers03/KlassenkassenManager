@@ -97,7 +97,7 @@ void PayCommand::redo()
 
 
 DeleteCommand::DeleteCommand(QVector<Student> &stud, QTableWidget *tableWidget, QTableWidget *payTable, QModelIndexList studSel, QModelIndexList paySel, QLineEdit *totalLineEdit,
-                             QLineEdit *balanceLineEdit, int selectedStudent, QUndoCommand *parent)
+                             QLineEdit *balanceLineEdit, int *selectedStudent, QUndoCommand *parent)
     : QUndoCommand (parent), st(stud)
 {
     oldStud = stud;
@@ -109,6 +109,7 @@ DeleteCommand::DeleteCommand(QVector<Student> &stud, QTableWidget *tableWidget, 
     balLine = balanceLineEdit;
 
     selectedSt = selectedStudent;
+    oldSelectedSt = *selectedStudent;
 }
 
 void DeleteCommand::undo()
@@ -132,6 +133,7 @@ void DeleteCommand::undo()
         total += st[i].getBalance();
     }
     totLine->setText(QString::number(total, 'f', 2));
+    *selectedSt = oldSelectedSt;    ////////////////////test
 }
 
 void DeleteCommand::redo()
@@ -139,19 +141,21 @@ void DeleteCommand::redo()
     for (int i = 0; i < paySel.size(); i++)
     {
         row = paySel[i].row();
-        st[selectedSt].changeBalance(-st[selectedSt].pay[row].getAmount());        //change balance
-        st[selectedSt].pay[row].changed = true;
+        st[oldSelectedSt].changeBalance(-st[oldSelectedSt].pay[row].getAmount());        //change balance
+        st[oldSelectedSt].pay[row].changed = true;
     }
 
-    for (int i = st[selectedSt].pay.size() - 1; i >= 0; i--)
-    {
-        if (st[selectedSt].pay[i].changed) {
-            st[selectedSt].pay.erase(st[selectedSt].pay.begin() + i);
-            payTable->removeRow(i);
+    if (oldSelectedSt != -1) {
+        for (int i = st[oldSelectedSt].pay.size() - 1; i >= 0; i--)    /// crash if no stud selected
+        {
+            if (st[oldSelectedSt].pay[i].changed) {
+                st[oldSelectedSt].pay.erase(st[oldSelectedSt].pay.begin() + i);
+                payTable->removeRow(i);
+            }
         }
-    }
 
-    balLine->setText(QString::number(st[selectedSt].getBalance(), 'f', 2));
+        balLine->setText(QString::number(st[oldSelectedSt].getBalance(), 'f', 2));
+    }
 
     /////////////////////////////////////
 

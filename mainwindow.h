@@ -57,9 +57,6 @@ private slots:
     void on_balanceButtonBox_rejected();
     void on_actionBeenden_triggered();
     void on_action_open_triggered();
-    void on_actionName_triggered();
-    void on_actionVorname_triggered();
-    void on_actionGuthaben_triggered();
     void on_clearSelectionButton_clicked();
     void on_actionExcel_triggered();
     void on_actionPDF_triggered();
@@ -81,7 +78,6 @@ private:
     Ui::MainWindow *ui;
     QMessageBox message;
 
-    int studAmount = 1;
     bool saved = true;
     int selectedStudent = -1;    //payments of selected student shown
     int sort = 1;           //1 = order by name, 2= vorname, 3 = balance

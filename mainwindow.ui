@@ -851,28 +851,19 @@ QToolButton:hover {
     <addaction name="separator"/>
     <addaction name="menuImportieren"/>
     <addaction name="menuExport"/>
+    <addaction name="separator"/>
     <addaction name="actionBeenden"/>
    </widget>
    <widget class="QMenu" name="menuBearbeiten">
     <property name="title">
      <string>Bearbeiten</string>
     </property>
-    <widget class="QMenu" name="menuSortieren">
-     <property name="title">
-      <string>Sortieren</string>
-     </property>
-     <addaction name="actionName"/>
-     <addaction name="actionVorname"/>
-     <addaction name="actionGuthaben"/>
-    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="addStudent"/>
     <addaction name="deleteStudent"/>
     <addaction name="actionEditMode"/>
-    <addaction name="separator"/>
-    <addaction name="menuSortieren"/>
    </widget>
    <addaction name="menuDatei"/>
    <addaction name="menuBearbeiten"/>
@@ -947,21 +938,6 @@ QToolButton:hover {
   <action name="actionBeenden">
    <property name="text">
     <string>Beenden</string>
-   </property>
-  </action>
-  <action name="actionName">
-   <property name="text">
-    <string>Name</string>
-   </property>
-  </action>
-  <action name="actionVorname">
-   <property name="text">
-    <string>Vorname</string>
-   </property>
-  </action>
-  <action name="actionGuthaben">
-   <property name="text">
-    <string>Guthaben</string>
    </property>
   </action>
   <action name="actionExcel">

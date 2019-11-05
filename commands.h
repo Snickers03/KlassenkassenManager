@@ -55,7 +55,7 @@ class DeleteCommand : public QUndoCommand
 {
 public:
     DeleteCommand(QVector<Student> &stud, QTableWidget *tableWidget = nullptr, QTableWidget *payTable = nullptr, QModelIndexList studSel = QList<QModelIndex>(), QModelIndexList paySel = QList<QModelIndex>(),
-                  QLineEdit *totalLineEdit = nullptr, QLineEdit *balanceLineEdit = nullptr, int selectedStudent = 0, QUndoCommand *parent = nullptr);
+                  QLineEdit *totalLineEdit = nullptr, QLineEdit *balanceLineEdit = nullptr, int *selectedStudent = nullptr, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;
@@ -70,7 +70,8 @@ private:
     QLineEdit *totLine;
     QLineEdit *balLine;
 
-    int selectedSt;
+    int *selectedSt;
+    int oldSelectedSt;
     int row;
 };
 

@@ -307,7 +307,7 @@ void MainWindow::on_deleteStudent_triggered()
         return;
     }
 
-    QUndoCommand *deleteCommand = new DeleteCommand(stud, ui->tableWidget, ui->payTable, studSel, paySel, ui->totalLineEdit, ui->balanceLineEdit, selectedStudent);
+    QUndoCommand *deleteCommand = new DeleteCommand(stud, ui->tableWidget, ui->payTable, studSel, paySel, ui->totalLineEdit, ui->balanceLineEdit, &selectedStudent);
     undoStack->push(deleteCommand);
 
     saved = false;
@@ -464,36 +464,12 @@ void MainWindow::openDatabase()
     if (selectedStudent != -1 && stud.size() != 0) {
         on_tableWidget_cellDoubleClicked(selectedStudent, 0);
     }
+    else if (stud.size() != 0) {
+        on_tableWidget_cellDoubleClicked(0, 0);
+    }
     else {
         ui->payTable->model()->removeRows(0, ui->payTable->rowCount());             //clear table
     }
-}
-
-void MainWindow::on_actionName_triggered()
-{
-    /*
-    sort = 1;
-    on_actionSpeichern_triggered();
-    on_action_open_triggered();
-    */
-}
-
-void MainWindow::on_actionVorname_triggered()
-{
-    /*
-    sort = 2;
-    on_actionSpeichern_triggered();
-    on_action_open_triggered();
-    */
-}
-
-void MainWindow::on_actionGuthaben_triggered()
-{
-    /*
-    sort = 3;
-    on_actionSpeichern_triggered();
-    on_action_open_triggered();
-    */
 }
 
 void MainWindow::on_actionExcel_triggered()         //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
