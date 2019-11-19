@@ -67,21 +67,18 @@ PayCommand::PayCommand(QVector<Student> &stud, QString date, QString reason, dou
 
 void PayCommand::undo()
 {
-    qDebug() << "undo";
-
     for (int i = 0; i < sel.size(); i++)
     {
         row = sel[i].row();
         st[row].changeBalance(-amount);
-
         st[row].pay.erase(st[row].pay.begin() + st[row].pay.size() - 1);
-        updateTable(row, table, st, totLine);
+
+        updateTable(row, table, st, totLine);      
     }
 }
 
 void PayCommand::redo()
 {
-    qDebug() << "redo";
     for (int i = 0; i < sel.size(); i++)
     {
         row = sel[i].row();
@@ -114,6 +111,7 @@ DeleteCommand::DeleteCommand(QVector<Student> &stud, QTableWidget *tableWidget, 
 
 void DeleteCommand::undo()
 {
+    table->blockSignals(true);
     st = oldStud;                           //replaces stud vector with old copy
 
     table->model()->removeRows(0, table->rowCount());
@@ -134,6 +132,7 @@ void DeleteCommand::undo()
     }
     totLine->setText(QString::number(total, 'f', 2));
     *selectedSt = oldSelectedSt;    ////////////////////test
+    table->blockSignals(false);
 }
 
 void DeleteCommand::redo()
@@ -146,7 +145,7 @@ void DeleteCommand::redo()
     }
 
     if (oldSelectedSt != -1) {
-        for (int i = st[oldSelectedSt].pay.size() - 1; i >= 0; i--)    /// crash if no stud selected
+        for (int i = st[oldSelectedSt].pay.size() - 1; i >= 0; i--)
         {
             if (st[oldSelectedSt].pay[i].changed) {
                 st[oldSelectedSt].pay.erase(st[oldSelectedSt].pay.begin() + i);
@@ -169,6 +168,10 @@ void DeleteCommand::redo()
     {
         if (st[i].changed) {
             st.erase(st.begin() + i);       //erase selected student
+
+            if (i == oldSelectedSt) {       //clear payTable if selected Student deleted
+                payTable->setRowCount(0);
+            }
         }
     }
 
@@ -178,6 +181,11 @@ void DeleteCommand::redo()
     }
     table->setRowCount(st.size());                   //remove empty rows
     table->clearSelection();
+
+    if (*selectedSt >= st.size())
+    {
+        *selectedSt = st.size() - 1;
+    }
 }
 
 
@@ -340,6 +348,9 @@ void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit 
     table->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));
     if (stud[row].getBalance() < 0) {
         table->item(row, 2)->setTextColor(Qt::red);
+    }
+    else {
+        table->item(row, 2)->setTextColor(Qt::black);
     }
 
     double total = 0;

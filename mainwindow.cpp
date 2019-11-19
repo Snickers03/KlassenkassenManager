@@ -91,7 +91,7 @@ void MainWindow::saveSettings()
 void MainWindow::closeEvent(QCloseEvent *event)             //https://stackoverflow.com/questions/17480984/qt-how-do-i-handle-the-event-of-the-user-pressing-the-x-close-button
 {
     if (edit == true) {
-        on_editSaveButton_clicked();   //saves edits when closing
+        on_editSaveButton_clicked();            //saves edits when closing
     }
 
     if (saved == true) {
@@ -167,8 +167,6 @@ void MainWindow::updateTable(int row)
         total += stud[i].getBalance();
     }
     ui->totalLineEdit->setText(QString::number(total, 'f', 2));             //update total
-
-    saved = false;
     ui->tableWidget->blockSignals(false);
 }
 
@@ -189,8 +187,6 @@ void MainWindow::addCell()
         total += stud[i].getBalance();
     }
     ui->totalLineEdit->setText(QString::number(total, 'f', 2));
-
-    saved = false;
     ui->tableWidget->blockSignals(false);
 }
 
@@ -248,7 +244,7 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int col)
     if (edit == false || (edit == true && col == 2))                            //if edit enabled, only execute if balance row double clicked
     {
         selectedStudent = row;
-        ui->transactionLabel->setText("Transaktionen von " + stud[row].getName()+ " " + stud[row].getVorname());
+        ui->transactionLabel->setText("Zahlungen von " + stud[row].getName()+ " " + stud[row].getVorname());
 
         ui->payTable->model()->removeRows(0, ui->payTable->rowCount());         //clear table
         int currentRow = 0;
@@ -267,6 +263,13 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int col)
             ui->payTable->setItem(currentRow, 1, new QTableWidgetItem(reason));
             ui->payTable->setItem(currentRow, 2, new QTableWidgetItem(QString::number(amount, 'f', 2)));
             ui->payTable->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+            if (amount < 0) {
+                ui->payTable->item(currentRow, 2)->setTextColor(Qt::red);
+            }
+            else {
+                ui->payTable->item(currentRow, 2)->setTextColor(Qt::darkGreen);
+            }
 
             studTotal += amount;
         }
@@ -293,7 +296,7 @@ void MainWindow::on_clearSelectionButton_clicked()
 void MainWindow::on_deleteStudent_triggered()
 {
     if (edit == true) {
-        on_editSaveButton_clicked();        //saves edits when closing
+        on_editSaveButton_clicked();        //ends edit mode
     }
 
     QItemSelectionModel *studSelections = ui->tableWidget->selectionModel();
@@ -394,7 +397,7 @@ void MainWindow::on_action_open_triggered()
     database.open();
     query = QSqlQuery(database);
 
-    this->setWindowTitle("KlassenkassenManager      |       " + databaseName);
+    this->setWindowTitle("KlassenkassenManager      |       " + databaseName);      //make filename visible in window title
     selectedStudent = -1;                   //no student selected
     saveSettings();                         //save opened file
     openDatabase();
@@ -425,7 +428,7 @@ void MainWindow::openDatabase()
     int idVorname = rec.indexOf("vorname");
     int idBalance = rec.indexOf("balance");
 
-    int order[100];                                                     //turn into vector maybe
+    int order[100];
 
     for (int i = 0; query.next(); i++)
     {
@@ -474,7 +477,7 @@ void MainWindow::openDatabase()
 
 void MainWindow::on_actionExcel_triggered()         //import               //https://wiki.qt.io/Handling_Microsoft_Excel_file_format           http://qtxlsx.debao.me/
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Importiere Excel-Datei", "C://", "Excel Dateien (*.xlsx) ;; Alle Dateien (*.*)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
+    QString filename = QFileDialog::getOpenFileName(this, "Importiere Excel-Datei", "C://", "Excel Dateien (*.xlsx)");     //https://www.youtube.com/watch?v=Fgt4WWdn3Ko
     //qDebug() << filename;                         //crashes sometimes, changing font fixes it for some f reason
 
     if (filename == "") {                           //cancel if no file selected
@@ -486,13 +489,10 @@ void MainWindow::on_actionExcel_triggered()         //import               //htt
     }
 
 /////////////
-    undoStack->clear();                             //clear undo stack
-    stud.clear();                                   //delete all old students & payments
+
     int nameHeader[2] = {0, 0};
     int vornameHeader[2] = {0, 0};
     int balanceHeader[2] = {0, 0};
-
-    ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
 
     QXlsx::Document xlsx(filename);
 
@@ -516,11 +516,15 @@ void MainWindow::on_actionExcel_triggered()         //import               //htt
     }
 
     if (nameHeader[0] == 0 || vornameHeader[0] == 0) {
-        message.critical(this, "Error", "Namen und Vornamen Spalten nicht gefunden; "
-                                        "Die Spalten müssen mit 'Name' und 'Vorname' beschriftet sein und sich in der oberen linken Ecke der Excel-Datei befinden. "
+        message.critical(this, "Error", "Namen und Vornamen Spalten nicht gefunden;\n"
+                                        "Die Spalten müssen mit 'Name' und 'Vorname' beschriftet sein und sich in der oberen linken Ecke der Excel-Datei befinden.\n"
                                         "Optional: Die Spalte mit dem Kontostand muss mit 'Guthaben' beschriftet sein.");
         return;
     }
+
+    undoStack->clear();                             //clear undo stack
+    stud.clear();                                   //delete all old students & payments
+    ui->tableWidget->model()->removeRows(0, ui->tableWidget->rowCount());       //clear student table
 
     for (int i = 0; xlsx.cellAt(i + nameHeader[0] + 1, nameHeader[1])->value().toString() != ""; i++)           //run until empty cell
     {
@@ -546,6 +550,7 @@ void MainWindow::on_actionExcel_triggered()         //import               //htt
 
         addCell();
     }
+    saved = false;
 }
 
 void MainWindow::on_actionExcelExport_triggered()
@@ -594,14 +599,11 @@ void MainWindow::on_actionEditMode_triggered()
 {
     ui->tableWidget->blockSignals(true);
     edit = true;
-    //setStyleSheet("centralWidget{background-color: #b3ffbb}");
-    //setStyleSheet("QMainWindow {background-color: #b3ffbb}");
-    //ui->centralWidget->setStyleSheet("background-color: #b3ffbb");
 
     ui->tableWidget->setEditTriggers(QAbstractItemView::DoubleClicked);
     ui->payTable->setEditTriggers(QAbstractItemView::DoubleClicked);
 
-    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);      //change selection style from multiple rows to single cell
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectItems);
     ui->tableWidget->clearSelection();
 
@@ -669,12 +671,12 @@ void MainWindow::on_actionUndo_triggered()
     undoStack->undo();
     saved = false;
 
-    if (selectedStudent >= stud.size())
+    if (selectedStudent >= stud.size())         //change selectedStudent if deleted student selected
     {
         selectedStudent = stud.size() - 1;
     }
 
-    if (selectedStudent != -1) {                            //refresh payTable
+    if (selectedStudent != -1) {                            //refresh payTable if any student is selected
         on_tableWidget_cellDoubleClicked(selectedStudent, 2);
     }
 }
@@ -684,12 +686,12 @@ void MainWindow::on_actionRedo_triggered()
     undoStack->redo();
     saved = false;
 
-    if (selectedStudent >= stud.size())
+    if (selectedStudent >= stud.size())                 //change selectedStudent if deleted student selected
     {
         selectedStudent = stud.size() - 1;
     }
 
-    if (selectedStudent != -1) {                //refresh payTable
+    if (selectedStudent != -1) {                            //refresh payTable
         on_tableWidget_cellDoubleClicked(selectedStudent, 2);
     }
 }

@@ -9,8 +9,7 @@ class AddCommand : public QUndoCommand
 {
 public:
     AddCommand(QVector<Student> &stud, QString vorname = "", QString name = "", double balance = 0,
-               QTableWidget *tableWidget = nullptr, QLineEdit *totalLineEdit = nullptr, QUndoCommand *parent = nullptr);   /////parameter needed maybe
-    //~AddCommand() override;
+               QTableWidget *tableWidget = nullptr, QLineEdit *totalLineEdit = nullptr, QUndoCommand *parent = nullptr);
 
     void redo() override;
     void undo() override;

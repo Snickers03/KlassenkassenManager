@@ -22,16 +22,12 @@ public:
     void changeBalance(double amount);
     bool changed = false;
 
-    //Payments pay[50];
     QVector<Payments> pay;
-    //int payCount;
 
 private:
     QString vorname;
     QString name;
     double balance;
-
-   // QVector<QString> payments;
 };
 
 #endif // STUDENT_H

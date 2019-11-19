@@ -58,20 +58,21 @@ private slots:
     void on_actionBeenden_triggered();
     void on_action_open_triggered();
     void on_clearSelectionButton_clicked();
+
     void on_actionExcel_triggered();
     void on_actionPDF_triggered();
     void on_actionExcelExport_triggered();
+
     void on_actionEditMode_triggered();
     void on_editSaveButton_clicked();
+
     void on_minusToolButton_clicked();
     void on_plusToolButton_clicked();
 
     void on_actionUndo_triggered();
-
     void on_actionRedo_triggered();
 
     void on_tableWidget_cellChanged(int row, int column);
-
     void on_payTable_cellChanged(int row, int column);
 
 private:
@@ -90,12 +91,10 @@ private:
     QSqlQuery query;
     QSqlTableModel *model;
 
-    //
     QAction *addAction;
     QAction *deleteAction;
     QAction *payAction;
     QAction *editAction;
-    //QAction *sortAction;  ???
 
     QAction *undoAction;
     QAction *redoAction;

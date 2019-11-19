@@ -20,9 +20,7 @@ public:
 private slots:
 
     void on_quitYes_clicked();
-
     void on_quitNo_clicked();
-
     void on_cancelPushButton_clicked();
 
 private:

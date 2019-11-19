@@ -9,7 +9,7 @@ Student::Student(QString name, QString vorname, double balance)
 
 Student::Student()
 {
-    //pay.resize(50);
+
 };
 
 void Student::setName(QString name)
