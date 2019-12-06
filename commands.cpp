@@ -361,7 +361,3 @@ void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit 
     totalLineEdit->setText(QString::number(total, 'f', 2));
     table->blockSignals(false);
 }
-
-
-
-

@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include <QPushButton>
 
+
 addStudent::addStudent(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::addStudent)
@@ -18,6 +19,15 @@ addStudent::~addStudent()
 
 void addStudent::on_buttonBox_accepted()
 {
+    name = ui->lineEdit->text();
+    vorname = ui->lineEdit_2->text();
+    balance = ui->doubleSpinBox->value();
+
+    if (name == "" || vorname == "") {
+        message.critical(this, "Error", "Alle Felder müssen ausgefüllt werden!");
+        return;
+    }
+
     accept();
 }
 
@@ -28,19 +38,16 @@ void addStudent::on_buttonBox_rejected()
 
 QString addStudent::getName()
 {
-    name = ui->lineEdit->text();
     return name;
 }
 
 QString addStudent::getVorname()
 {
-    vorname = ui->lineEdit_2->text();
     return vorname;
 }
 
 double addStudent::getBalance()
-{
-    balance = ui->doubleSpinBox->value();
+{   
     return balance;
 }
 

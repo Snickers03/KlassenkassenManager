@@ -2,6 +2,7 @@
 #define ADDSTUDENT_H
 
 #include <QDialog>
+#include <QMessageBox>
 
 namespace Ui {
 class addStudent;
@@ -32,6 +33,7 @@ private slots:
 
 private:
     Ui::addStudent *ui;
+    QMessageBox message;
 
     QString name;
     QString vorname;

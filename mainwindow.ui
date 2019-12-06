@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1157</width>
+    <width>1207</width>
     <height>764</height>
    </rect>
   </property>
@@ -43,7 +43,7 @@ QPushButton:hover {
 
 QTableWidget {
     gridline-color: rgb(100, 100, 100);
-    font-size: 12pt;
+    font-size: 11pt;
 	min-width: 30%;
 	min-height: 70%;
 }
@@ -179,6 +179,9 @@ QMenuBar {
         <property name="gridStyle">
          <enum>Qt::SolidLine</enum>
         </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
         <property name="cornerButtonEnabled">
          <bool>true</bool>
         </property>
@@ -209,11 +212,6 @@ QMenuBar {
         <attribute name="verticalHeaderStretchLastSection">
          <bool>false</bool>
         </attribute>
-        <row>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </row>
         <column>
          <property name="text">
           <string>Nachname</string>
@@ -229,30 +227,6 @@ QMenuBar {
           <string>Guthaben</string>
          </property>
         </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="textAlignment">
-          <set>AlignLeading|AlignVCenter</set>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string/>
-         </property>
-         <property name="textAlignment">
-          <set>AlignTrailing|AlignVCenter</set>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
@@ -446,12 +420,18 @@ QToolButton:hover {
           <height>72</height>
          </size>
         </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
         </property>
         <property name="cornerButtonEnabled">
          <bool>true</bool>
         </property>
+        <attribute name="horizontalHeaderHighlightSections">
+         <bool>false</bool>
+        </attribute>
         <column>
          <property name="text">
           <string>Datum</string>
@@ -715,7 +695,7 @@ QToolButton:hover {
         </property>
         <property name="minimumSize">
          <size>
-          <width>32</width>
+          <width>18</width>
           <height>0</height>
          </size>
         </property>
@@ -734,8 +714,17 @@ QToolButton:hover {
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string/>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
         </property>
         <property name="standardButtons">
          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
@@ -852,7 +841,7 @@ QToolButton:hover {
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
    <addaction name="addStudent"/>
-   <addaction name="deleteStudent"/>
+   <addaction name="actionDelete"/>
    <addaction name="actionEditMode"/>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -860,7 +849,7 @@ QToolButton:hover {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1157</width>
+     <width>1207</width>
      <height>21</height>
     </rect>
    </property>
@@ -897,7 +886,7 @@ QToolButton:hover {
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="addStudent"/>
-    <addaction name="deleteStudent"/>
+    <addaction name="actionDelete"/>
     <addaction name="actionEditMode"/>
    </widget>
    <addaction name="menuDatei"/>
@@ -933,7 +922,7 @@ QToolButton:hover {
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="deleteStudent">
+  <action name="actionDelete">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/images/images/icons8-cancel-96.png</normaloff>:/images/images/icons8-cancel-96.png</iconset>

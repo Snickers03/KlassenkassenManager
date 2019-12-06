@@ -181,10 +181,10 @@ void Export::pdfAll(QVector<Student> &stud)
 
 void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
 {
-    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
+    QString strStream;                                          //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
 
-    QItemSelectionModel *selections = tableWidget->selectionModel();
+    QItemSelectionModel *selections = tableWidget->selectionModel();    //get selected students
     QModelIndexList selected = selections->selectedRows();
 
     QPrinter printer;
@@ -206,7 +206,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
               <<  "</head>\n"
                   "<body bgcolor=#ffffff link=#5000A0>\n"
                <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[sel].getName() + " " + stud[sel].getVorname());
-        out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
+        out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";       //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
 
         // headers
         out << "<thead><tr bgcolor=#f0f0f0>";
@@ -245,7 +245,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
         QTextDocument *document = new QTextDocument();
         document->setHtml(strStream);
 
-        document->print(&printer);
+        document->print(&printer);          //save
         delete document;
     }
 }

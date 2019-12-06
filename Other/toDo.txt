@@ -14,3 +14,7 @@ eventuell nach delete zahlung redo in edit mode
    
 -Beschriftung von Knöpfen grösser, allgemeine Designverbesserungen
 
+Installer:
+-remove component selection
+-option for desktop shortcut
+
