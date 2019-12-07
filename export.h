@@ -5,6 +5,8 @@
 #include <QWidget>
 #include <QTableWidget>
 #include "mainwindow.h"
+#include "xlsxdocument.h"
+
 namespace Ui {
 class Export;
 }
@@ -34,6 +36,11 @@ private:
     Ui::Export *ui;
     QString filename;
     QMessageBox message;
+
+    QXlsx::Format fatFont;
+    QXlsx::Format redFont;
+    QXlsx::Format fatRedFont;
+
 };
 
 #endif // EXPORT_H

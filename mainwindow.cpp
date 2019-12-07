@@ -614,7 +614,7 @@ void MainWindow::on_actionExcelExport_triggered()
 
     switch (exp.choice) {
     case 0: return;
-    case 1: exp.excelOverView(stud, total);
+    case 1: exp.excelOverView(stud, ui->totalLineEdit->text().toDouble());
         break;
     case 2: exp.excelAll(stud);
         break;
@@ -635,7 +635,7 @@ void MainWindow::on_actionPDF_triggered()
 
     switch (exp.choice) {
     case 0: return;
-    case 4: exp.pdfOverView(stud, total);
+    case 4: exp.pdfOverView(stud, ui->totalLineEdit->text().toDouble());
         break;
     case 5: exp.pdfAll(stud);
         break;

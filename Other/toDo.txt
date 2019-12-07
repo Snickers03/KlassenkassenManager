@@ -6,6 +6,7 @@ einzahlungen grün, ausgaben rot
 
 Bugs: -manchmal absturz bei excel import
 eventuell nach delete zahlung redo in edit mode
+bei excel export total nicht aktuell
 
 
 ?: -Fenster mit allen Zahlungen, Bearbeitung der Zahlung für alle betroffenen Schüler

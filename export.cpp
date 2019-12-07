@@ -18,6 +18,13 @@ Export::Export(QWidget *parent, int mode) :
     this->mode = mode;
 
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText("Abbrechen");
+
+
+    fatFont.setFontBold(true);                  //set format properties
+    redFont.setFontColor(QColor(Qt::red));
+
+    fatRedFont.setFontBold(true);
+    fatRedFont.setFontColor(QColor(Qt::red));
 }
 
 Export::~Export()
@@ -253,52 +260,72 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
 void Export::excelOverView(QVector<Student> &stud, double total)
 {
     QXlsx::Document xlsx;       //overview
-    QXlsx::Format format;
-    format.setFontBold(true);
 
-    xlsx.write("A1", "Name", format);       //headers
-    xlsx.write("B1", "Vorname", format);
-    xlsx.write("C1", "Guthaben", format);
+    xlsx.write("A1", "Name", fatFont);       //headers
+    xlsx.write("B1", "Vorname", fatFont);
+    xlsx.write("C1", "Guthaben", fatFont);
 
     for (int i = 0; i < stud.size(); i++)
     {
         xlsx.write(i + 2, 1, stud[i].getName());
         xlsx.write(i + 2, 2, stud[i].getVorname());
-        xlsx.write(i + 2, 3, stud[i].getBalance());
+
+        if (stud[i].getBalance() < 0) {
+            xlsx.write(i + 2, 3, stud[i].getBalance(), redFont);        //red if negative
+        }
+        else {
+            xlsx.write(i + 2, 3, stud[i].getBalance());
+        }
     }
 
-    xlsx.write(stud.size() + 3, 2, "Total:", format);
-    xlsx.write(stud.size() + 3, 3, total, format);
+    xlsx.write(stud.size() + 3, 2, "Total:", fatFont);
 
+    if (total < 0) {
+        xlsx.write(stud.size() + 3, 3, total, fatRedFont);
+    }
+    else {
+        xlsx.write(stud.size() + 3, 3, total, fatFont);
+    }
+    qDebug() << total;
     xlsx.saveAs(filename + ".xlsx");
 }
 
 void Export::excelAll(QVector<Student> &stud)
 {
     QXlsx::Document xlsx;
-    QXlsx::Format format;
-    format.setFontBold(true);
 
     for (int i = 0; i < stud.size(); i++)
     {
         xlsx.addSheet(stud[i].getName());
 
-        xlsx.write("A1", "Zahlungen von", format);
-        xlsx.write("B1", stud[i].getName(), format);
-        xlsx.write("C1", stud[i].getVorname(), format);
-        xlsx.write("A3", "Datum", format);
-        xlsx.write("B3", "Grund", format);
-        xlsx.write("C3", "Menge", format);
+        xlsx.write("A1", "Zahlungen von", fatFont);
+        xlsx.write("B1", stud[i].getName(), fatFont);
+        xlsx.write("C1", stud[i].getVorname(), fatFont);
+        xlsx.write("A3", "Datum", fatFont);
+        xlsx.write("B3", "Grund", fatFont);
+        xlsx.write("C3", "Menge", fatFont);
 
         for (int j = 0; j < stud[i].pay.size(); j++)
         {
             xlsx.write(j + 4, 1, stud[i].pay[j].getDate());
             xlsx.write(j + 4, 2, stud[i].pay[j].getReason());
-            xlsx.write(j + 4, 3, stud[i].pay[j].getAmount());
+
+            if (stud[i].pay[j].getAmount() < 0) {
+                xlsx.write(j + 4, 3, stud[i].pay[j].getAmount(), redFont);      //red if negative
+            }
+            else {
+                xlsx.write(j + 4, 3, stud[i].pay[j].getAmount());
+            }
         }
 
-        xlsx.write(stud[i].pay.size() + 5, 2, "Total:", format);
-        xlsx.write(stud[i].pay.size() + 5, 3, stud[i].getBalance(), format);
+        xlsx.write(stud[i].pay.size() + 5, 2, "Total:", fatFont);
+
+        if (stud[i].getBalance() < 0) {
+            xlsx.write(stud[i].pay.size() + 5, 3, stud[i].getBalance(), fatRedFont);
+        }
+        else {
+            xlsx.write(stud[i].pay.size() + 5, 3, stud[i].getBalance(), fatFont);
+        }
     }
     xlsx.saveAs(filename + ".xlsx");
 }
@@ -306,8 +333,6 @@ void Export::excelAll(QVector<Student> &stud)
 void Export::excelSelected(QVector<Student> &stud, QTableWidget* tableWidget)
 {
     QXlsx::Document xlsx;
-    QXlsx::Format format;
-    format.setFontBold(true);
 
     QItemSelectionModel *selections = tableWidget->selectionModel();
     QModelIndexList selected = selections->selectedRows();
@@ -321,23 +346,35 @@ void Export::excelSelected(QVector<Student> &stud, QTableWidget* tableWidget)
         int sel = selected[i].row();
         xlsx.addSheet(stud[sel].getName());
 
-        xlsx.write("A1", "Zahlungen von", format);
-        xlsx.write("B1", stud[sel].getName(), format);
-        xlsx.write("C1", stud[sel].getVorname(), format);
+        xlsx.write("A1", "Zahlungen von", fatFont);
+        xlsx.write("B1", stud[sel].getName(), fatFont);
+        xlsx.write("C1", stud[sel].getVorname(), fatFont);
 
-        xlsx.write("A3", "Datum", format);
-        xlsx.write("B3", "Grund", format);
-        xlsx.write("C3", "Menge", format);
+        xlsx.write("A3", "Datum", fatFont);
+        xlsx.write("B3", "Grund", fatFont);
+        xlsx.write("C3", "Menge", fatFont);
 
         for (int j = 0; j < stud[sel].pay.size(); j++)
         {
             xlsx.write(j + 4, 1, stud[sel].pay[j].getDate());
             xlsx.write(j + 4, 2, stud[sel].pay[j].getReason());
-            xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
+            if (stud[sel].pay[j].getAmount() < 0) {
+                xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount(), redFont);
+            }
+            else {
+                xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
+            }
+
         }
 
-        xlsx.write(stud[sel].pay.size() + 5, 2, "Total:", format);
-        xlsx.write(stud[sel].pay.size() + 5, 3, stud[sel].getBalance(), format);
+        xlsx.write(stud[sel].pay.size() + 5, 2, "Total:", fatFont);
+
+        if (stud[sel].getBalance() < 0) {
+            xlsx.write(stud[sel].pay.size() + 5, 3, stud[sel].getBalance(), fatRedFont);
+        }
+        else {
+            xlsx.write(stud[sel].pay.size() + 5, 3, stud[sel].getBalance(), fatFont);
+        }
 
         stud[sel].changed = true;
     }
