@@ -1,5 +1,4 @@
 # KlassenkassenManager
-
 Der KlassenkassenManager ist ein Programm, welches die Verwaltung der Klassenkasse vereinfacht.
 
 ## Funktionen
@@ -11,8 +10,13 @@ Der KlassenkassenManager ist ein Programm, welches die Verwaltung der Klassenkas
 ## Download
 https://github.com/Snickers03/KlassenkassenManager/releases
 
+## Nutzungsanleitung
+https://github.com/Snickers03/KlassenkassenManager/blob/master/Nutzungsanleitung.pdf
+
 ## Kontakt 
 Bitte schicken Sie mir Fehlerberichte, Rückmeldungen und Verbesserungsvorschläge an nic.schellenbaum@gmail.com
 
-## Quelle Excel-Export
-https://github.com/VSRonin/QtXlsxWriter
+## Quellen
+* Excel Import und Export: https://github.com/VSRonin/QtXlsxWriter
+* Icons: https://icons8.com/icons
+* Restliche Quellen sind im Quellcode verlinkt
