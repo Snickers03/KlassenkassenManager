@@ -1,12 +1,12 @@
-# Matur
+# KlassenkassenManager
 
 Der KlassenkassenManager ist ein Programm, welches die Verwaltung der Klassenkasse vereinfacht.
 
-Funktionen:
+## Funktionen
 
--Importieren der Klassenliste möglich
--Export als Excel und PDF
--Zahlungen für beliebig viele Schüler erfassen
+* Importieren der Klassenliste möglich
+* Export als Excel und PDF
+* Zahlungen für beliebig viele Schüler erfassen
 
 # Download
 

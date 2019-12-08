@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>KlassenkassenManager</Name>
+    <Version>1.0.0</Version>
+    <Title>KlassenkassenManager 64-bit Installer</Title>
+    <Publisher>Nic Schellenbaum</Publisher>
+    <StartMenuDir>KlassenkassenManager</StartMenuDir>
+    <TargetDir>@HomeDir@/KlassenkassenManager</TargetDir>
+</Installer>

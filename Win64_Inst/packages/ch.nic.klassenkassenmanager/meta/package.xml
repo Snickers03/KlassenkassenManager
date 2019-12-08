@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>KlassenkassenManager</DisplayName>
+    <Description>Installiert den KlassenkassenManager, ein Programm zur Verwaltung der Klassenkasse</Description>
+    <ForcedInstallation>true</ForcedInstallation>
+    <Version>1.0.0-1</Version>
+    <ReleaseDate>2019-12-08</ReleaseDate>
+    <Licenses>
+        <License name="License" file="license.txt" />
+    </Licenses>
+    <Default>script</Default>
+    <Script>installscript.qs</Script>
+</Package>

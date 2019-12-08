@@ -149,7 +149,7 @@ void DeleteCommand::redo()
     }
 
     if (oldSelectedSt != -1) {
-        for (int i = st[oldSelectedSt].pay.size() - 1; i >= 0; i--)
+        for (int i = st[oldSelectedSt].pay.size() - 1; i >= 0; i--)             //backwards!
         {
             if (st[oldSelectedSt].pay[i].changed) {
                 st[oldSelectedSt].pay.erase(st[oldSelectedSt].pay.begin() + i);     //delete marked
@@ -160,7 +160,9 @@ void DeleteCommand::redo()
         balLine->setText(QString::number(st[oldSelectedSt].getBalance(), 'f', 2));
     }
 
+    //payments
     /////////////////////////////////////
+    //students
 
     for (int i = 0; i < studSel.size(); i++)
     {
