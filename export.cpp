@@ -79,7 +79,7 @@ void Export::pdfOverView(QVector<Student> &stud, double total)     //somewhat fi
 
     QPrinter printer;                                    //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(filename + ".pdf");
+    printer.setOutputFileName(filename + ".pdf");          //add file ending
 
     out <<  "<html>\n"
         "<head>\n"
@@ -88,7 +88,7 @@ void Export::pdfOverView(QVector<Student> &stud, double total)     //somewhat fi
         <<  "</head>\n"
         "<body bgcolor=#ffffff link=#5000A0>\n"
         <<  QString("<h3>%1</h3>\n").arg("Übersicht");
-    out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
+    out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";      //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
 
     // headers
     out << "<thead><tr bgcolor=#f0f0f0>";
@@ -99,17 +99,17 @@ void Export::pdfOverView(QVector<Student> &stud, double total)     //somewhat fi
 
     for (int i = 0; i < stud.size(); i++)
     {
-        out << "<tr>";
+        out << "<tr>";          //rows
         out << QString("<td bkcolor=0>%1</td>").arg(stud[i].getName());
         out << QString("<td bkcolor=0>%1</td>").arg(stud[i].getVorname());
         out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].getBalance(), 'f', 2));
         out << "</tr>\n";
     }
 
-    out << "<tr> </tr>\n <tr>";
+    out << "<tr> </tr>\n <tr>";     //empty row
     out << "<td bkcolor=0></td>";
     out << "<td bkcolor=0>Total: </td>";
-    out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(total, 'f', 2));
+    out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(total, 'f', 2));     //print total
     out << "</tr>";
 
     out <<  "</table>\n";
@@ -125,12 +125,12 @@ void Export::pdfOverView(QVector<Student> &stud, double total)     //somewhat fi
 
 void Export::pdfAll(QVector<Student> &stud)
 {
-    QString strStream;                                  //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
+    QString strStream;                              //https://stackoverflow.com/questions/3147030/qtableview-printing/4079676#4079676
     QTextStream out(&strStream);
 
-    QPrinter printer;             //https://doc.qt.io/qt-5/qtprintsupport-index.html
+    QPrinter printer;                               //https://doc.qt.io/qt-5/qtprintsupport-index.html
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(filename + ".pdf");
+    printer.setOutputFileName(filename + ".pdf");   //add file ending
 
     for (int i = 0; i < stud.size(); i++)
     {
@@ -140,7 +140,7 @@ void Export::pdfAll(QVector<Student> &stud)
             <<  QString("<title>%1</title>\n").arg("Export")
             <<  "</head>\n"
             "<body bgcolor=#ffffff link=#5000A0>\n"
-            <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[i].getName() + " " + stud[i].getVorname());
+            <<  QString("<h3>%1</h3>\n").arg("Transaktionen von " + stud[i].getName() + " " + stud[i].getVorname());        //print stud-info
         out <<  "<table border=1 cellspacing=0 cellpadding=2\n>";     //https://stackoverflow.com/questions/19993869/cannot-move-to-next-page-to-print-html-content-with-qprinter
 
         // headers
@@ -162,7 +162,7 @@ void Export::pdfAll(QVector<Student> &stud)
             out << "</tr>\n";
         }
 
-        out << "<tr> </tr>\n <tr>";
+        out << "<tr> </tr>\n <tr>";         //empty row
         out << "<td bkcolor=0></td>";
         out << "<td bkcolor=0 width=30%>Total: </td>";
         out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[i].getBalance(), 'f', 2));
@@ -171,7 +171,7 @@ void Export::pdfAll(QVector<Student> &stud)
         out <<  "</table>\n";
 
         if (i != stud.size() - 1) {
-            out << "<div style=\"page-break-after:always\"></div>";
+            out << "<div style=\"page-break-after:always\"></div>";     //new page
             qDebug() << "yees";
         }
 
@@ -196,7 +196,7 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
 
     QPrinter printer;
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(filename + ".pdf");
+    printer.setOutputFileName(filename + ".pdf");                   //add file ending
 
     if (selected.size() == 0) {
         message.critical(this, "Error", "Kein Schüler ausgewählt!");    //error if no student selected
@@ -232,19 +232,17 @@ void Export::pdfSelected(QTableWidget *tableWidget, QVector<Student> &stud)
             out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].pay[j].getAmount(), 'f', 2));
             out << "</tr>\n";
         }
-        out << "<tr> </tr>\n <tr>";
+        out << "<tr> </tr>\n <tr>";                 //empty row
         out << "<td bkcolor=0></td>";
-        out << "<td bkcolor=0 width=30%>Total: </td>";
+        out << "<td bkcolor=0 width=30%>Total: </td>";      //set width for wider reason cells
         out << QString("<td bkcolor=0 style=\"text-align:right\">%1</td>").arg(QString::number(stud[sel].getBalance(), 'f', 2));
         out << "</tr>";
         out <<  "</table>\n";
 
-        if (i < selected.size() - 1) {        /////////////////////////
-            out << "<div style=\"page-break-after:always\"></div>";
+        if (i < selected.size() - 1) {
+            out << "<div style=\"page-break-after:always\"></div>";         //new page
             qDebug() << "yees";
         }
-
-        stud[sel].changed = true;
 
         out <<  "</body>\n"
             "</html>\n";
@@ -364,7 +362,6 @@ void Export::excelSelected(QVector<Student> &stud, QTableWidget* tableWidget)
             else {
                 xlsx.write(j + 4, 3, stud[sel].pay[j].getAmount());
             }
-
         }
 
         xlsx.write(stud[sel].pay.size() + 5, 2, "Total:", fatFont);
@@ -375,8 +372,6 @@ void Export::excelSelected(QVector<Student> &stud, QTableWidget* tableWidget)
         else {
             xlsx.write(stud[sel].pay.size() + 5, 3, stud[sel].getBalance(), fatFont);
         }
-
-        stud[sel].changed = true;
     }
     xlsx.saveAs(filename + ".xlsx");
 }

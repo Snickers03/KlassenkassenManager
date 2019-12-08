@@ -25,7 +25,7 @@ AddCommand::AddCommand(QVector<Student> &stud, QString vorname, QString name, do
 void AddCommand::undo()
 {
     qDebug() << "undo";
-    st.erase(st.begin() + st.size() - 1);
+    st.erase(st.begin() + st.size() - 1);                       //delete last student
     table->removeRow(table->rowCount() - 1);
     totLine->setText(QString::number(oldTotal, 'f', 2));
 }
@@ -33,10 +33,10 @@ void AddCommand::undo()
 void AddCommand::redo()
 {
     table->blockSignals(true);
-    st.append(Student(name, vorname, balance));
+    st.append(Student(name, vorname, balance));                   //re-add student
     st[st.size() - 1].pay.append(Payments(date, "Anfangsbestand", balance));
 
-    table->insertRow(table->rowCount());    //add new cell
+    table->insertRow(table->rowCount());        //add new cell
     int currentRow = table->rowCount() - 1;
 
     table->setItem(currentRow, 0, new QTableWidgetItem(name));
@@ -117,17 +117,21 @@ void DeleteCommand::undo()
     table->model()->removeRows(0, table->rowCount());
 
     for (int i = 0; i < st.size(); i++) {
-    table->insertRow(table->rowCount());    //add new cell
-    int currentRow = table->rowCount() - 1;
+        table->insertRow(table->rowCount());        //add new cell
+        int currentRow = table->rowCount() - 1;
 
-    table->setItem(currentRow, 0, new QTableWidgetItem(st[currentRow].getName()));
-    table->setItem(currentRow, 1, new QTableWidgetItem(st[currentRow].getVorname()));
-    table->setItem(currentRow, 2, new QTableWidgetItem(QString::number(st[currentRow].getBalance(), 'f', 2)));
-    table->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+        table->setItem(currentRow, 0, new QTableWidgetItem(st[currentRow].getName()));
+        table->setItem(currentRow, 1, new QTableWidgetItem(st[currentRow].getVorname()));
+        table->setItem(currentRow, 2, new QTableWidgetItem(QString::number(st[currentRow].getBalance(), 'f', 2)));
+        table->item(currentRow, 2)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+        if (st[currentRow].getBalance() < 0) {
+            table->item(currentRow, 2)->setTextColor(Qt::red);      //red if negative
+        }
     }
     double total = 0;
 
-    for (int i = 0; i < st.size(); i++) {
+    for (int i = 0; i < st.size(); i++) {           //update total
         total += st[i].getBalance();
     }
     totLine->setText(QString::number(total, 'f', 2));
@@ -141,14 +145,14 @@ void DeleteCommand::redo()
     {
         row = paySel[i].row();
         st[oldSelectedSt].changeBalance(-st[oldSelectedSt].pay[row].getAmount());        //change balance
-        st[oldSelectedSt].pay[row].changed = true;
+        st[oldSelectedSt].pay[row].changed = true;          //mark selected
     }
 
     if (oldSelectedSt != -1) {
         for (int i = st[oldSelectedSt].pay.size() - 1; i >= 0; i--)
         {
             if (st[oldSelectedSt].pay[i].changed) {
-                st[oldSelectedSt].pay.erase(st[oldSelectedSt].pay.begin() + i);
+                st[oldSelectedSt].pay.erase(st[oldSelectedSt].pay.begin() + i);     //delete marked
                 payTable->removeRow(i);
             }
         }
@@ -164,12 +168,12 @@ void DeleteCommand::redo()
         st[row].changed = true;             //mark selected student, no direct deletion due to studSel dependent on order of selection -> no guarantee of deletion from back to front
     }
 
-    for (int i = st.size() - 1; i >= 0; i--)
+    for (int i = st.size() - 1; i >= 0; i--)        //backwards!
     {
         if (st[i].changed) {
-            st.erase(st.begin() + i);       //erase selected student
+            st.erase(st.begin() + i);           //erase selected student
 
-            if (i == oldSelectedSt) {       //clear payTable if selected Student deleted
+            if (i == oldSelectedSt) {           //clear payTable if selected Student deleted
                 payTable->setRowCount(0);
             }
         }
@@ -182,9 +186,9 @@ void DeleteCommand::redo()
     table->setRowCount(st.size());                   //remove empty rows
     table->clearSelection();
 
-    if (*selectedSt >= st.size())
+    if (*selectedSt >= st.size())               //if selectedStud deleted
     {
-        *selectedSt = st.size() - 1;
+        *selectedSt = st.size() - 1;            //select last student
     }
 }
 
@@ -209,7 +213,7 @@ EditCommand::EditCommand(QVector<Student> &stud, QTableWidget *tableWidget, QTab
 
     if (mode == 1)              //student edited
     {
-        if (column == 0) {
+        if (column == 0) {                                                          //saves old and newvalue dependent of edited column
             oldValue = st[row].getName();
             newValue = studTable->item(row, 0)->text();
         }
@@ -346,8 +350,9 @@ void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit 
     table->item(row, 0)->setText(stud[row].getName());
     table->item(row, 1)->setText(stud[row].getVorname());
     table->item(row, 2)->setText(QString::number(stud[row].getBalance(), 'f', 2));
+
     if (stud[row].getBalance() < 0) {
-        table->item(row, 2)->setTextColor(Qt::red);
+        table->item(row, 2)->setTextColor(Qt::red);         //red if negative
     }
     else {
         table->item(row, 2)->setTextColor(Qt::black);
@@ -355,7 +360,7 @@ void updateTable(int row, QTableWidget *table, QVector<Student> stud, QLineEdit 
 
     double total = 0;
 
-    for (int i = 0; i < stud.size(); i++) {
+    for (int i = 0; i < stud.size(); i++) {                 //update total
         total += stud[i].getBalance();
     }
     totalLineEdit->setText(QString::number(total, 'f', 2));
