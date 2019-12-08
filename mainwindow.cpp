@@ -106,7 +106,8 @@ void MainWindow::loadSettings()                                         //https:
 {
     QSettings settings("Nic AG", "KlassenkassenManager");
     settings.beginGroup("MainWindow");
-    databaseName = settings.value("dbFile", "studentDatabase.db").toString();       //open file last opened
+    databaseName = settings.value("dbFile", QStandardPaths::locate(
+                                      QStandardPaths::DocumentsLocation, QString(), QStandardPaths::LocateDirectory) + "klassenkasse.db").toString();       //open file last opened
     settings.endGroup();
 }
 
